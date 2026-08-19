@@ -30,6 +30,8 @@ export type Vitals = {
     distinctKeys: number;
     /** Share of set time spent in each Camelot number, 1-12. Drives the rings. */
     keyTimeShare: Record<number, number>;
+    /** The same share split by full key, e.g. '8A' — the A/B mix inside each ring. */
+    keyTimeShareByKey: Record<string, number>;
     /** Where the fastest track sat, 0 (first) to 1 (last). */
     peakPosition: number | null;
     shape: SetShape | null;
@@ -145,7 +147,12 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
 
   // --- ring weights --------------------------------------------------------
   const keyTimeShare: Record<number, number> = {};
-  for (let n = 1; n <= 12; n++) keyTimeShare[n] = 0;
+  const keyTimeShareByKey: Record<string, number> = {};
+  for (let n = 1; n <= 12; n++) {
+    keyTimeShare[n] = 0;
+    keyTimeShareByKey[`${n}A`] = 0;
+    keyTimeShareByKey[`${n}B`] = 0;
+  }
   let totalWeight = 0;
   for (const t of keyed) {
     const c = parseCamelot(t.camelot);
@@ -154,10 +161,15 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
     // export carried no durations.
     const weight = t.durationS ?? 1;
     keyTimeShare[c.number] += weight;
+    keyTimeShareByKey[`${c.number}${c.letter}`] += weight;
     totalWeight += weight;
   }
   if (totalWeight > 0) {
-    for (let n = 1; n <= 12; n++) keyTimeShare[n] /= totalWeight;
+    for (let n = 1; n <= 12; n++) {
+      keyTimeShare[n] /= totalWeight;
+      keyTimeShareByKey[`${n}A`] /= totalWeight;
+      keyTimeShareByKey[`${n}B`] /= totalWeight;
+    }
   }
 
   return {
@@ -174,6 +186,7 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
       bpm,
       distinctKeys,
       keyTimeShare,
+      keyTimeShareByKey,
       peakPosition,
       shape: shapeOf(bpm?.spread ?? 0, climb, peakPosition),
     },
