@@ -80,21 +80,26 @@ function Arc({
 }
 
 /**
- * The visible break at each end of an arc, as a fraction of the full circle.
- * This is what makes rotation legible: a closed torus turning about its own
- * axis is pixel-identical frame to frame, so without a cut in it a ring looks
- * completely still even while spinning.
+ * How far each arc runs past its join, as a fraction of the full circle.
+ *
+ * The two arcs overlap rather than leaving a gap: a lap joint, not a cut. The
+ * doubled tube catches light slightly differently where the ends cross, which
+ * is enough to read as a seam without breaking the ring — and it still reads
+ * when both arcs are the same color, which is the case whenever a key was
+ * played in only one of its two forms. It matters because a closed torus
+ * turning about its own axis is pixel-identical frame to frame; with nothing
+ * on it, a spinning ring looks completely still.
  */
-const CUT = 0.016;
+const SEAM = 0.014;
 
 /**
- * One ring, always drawn as two arcs with a gap at each junction.
+ * One ring, always drawn as two arcs that overlap slightly at each join.
  *
  * The two arcs take different colors only when a key was genuinely played in
  * both its minor and its major — that is the sole thing a second color ever
  * means here. When a key was played in only one of them, both arcs are that
- * one color and the ring reads as a single hue; the cut alone carries the
- * motion.
+ * one color and the ring reads as a single unbroken hue; the seam alone
+ * carries the motion.
  */
 function SplitRing({
   radius,
@@ -116,16 +121,16 @@ function SplitRing({
       <Arc
         radius={radius}
         tube={tube}
-        fraction={splitAt - CUT}
-        offset={CUT / 2}
+        fraction={splitAt + SEAM}
+        offset={0}
         color={firstColor}
         opacity={opacity}
       />
       <Arc
         radius={radius}
         tube={tube}
-        fraction={1 - splitAt - CUT}
-        offset={splitAt + CUT / 2}
+        fraction={1 - splitAt + SEAM}
+        offset={splitAt}
         color={secondColor}
         opacity={opacity}
       />

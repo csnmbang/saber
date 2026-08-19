@@ -25,8 +25,8 @@ describe('ringSplit', () => {
     expect(split.secondLetter).toBe('B');
   });
 
-  it('still cuts a single-color ring, so it can be seen turning', () => {
-    // The cut exists regardless — that is what makes rotation legible — but on
+  it('still seams a single-color ring, so it can be seen turning', () => {
+    // The seam exists regardless — that is what makes rotation legible — but on
     // a single-letter ring it must not imply a second key was played.
     expect(ringSplit(1).splitAt).toBe(0.5);
     expect(ringSplit(0).splitAt).toBe(0.5);

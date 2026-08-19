@@ -1,14 +1,14 @@
 /**
  * How one ring is cut into its two arcs.
  *
- * Every ring is drawn as two arcs with a gap at each junction, because a
- * closed torus turning about its own axis is pixel-identical frame to frame —
- * without a cut in it, a spinning ring looks completely still.
+ * Every ring is drawn as two arcs that overlap slightly at each join, because
+ * a closed torus turning about its own axis is pixel-identical frame to frame —
+ * without some seam on it, a spinning ring looks completely still.
  *
  * The colors are the part that carries meaning, and the rule is strict: two
  * different colors on a ring mean the key was genuinely played in both its
  * minor (A) and its major (B), and nothing else. A key played in only one of
- * them is a single color, and the cut alone shows the rotation.
+ * them is a single color, and the seam alone shows the rotation.
  */
 export type RingSplit = {
   /** Where the first arc ends, as a fraction of the circle. */
@@ -28,8 +28,8 @@ export function ringSplit(aShare: number): RingSplit {
     return { splitAt: aShare, firstLetter: 'A', secondLetter: 'B' };
   }
   // Only one letter was played. Both arcs take it, so the ring reads as one
-  // color; the split at half is arbitrary and carries no meaning beyond
-  // letting the eye see the ring turn.
+  // unbroken color; the split at half is arbitrary and carries no meaning
+  // beyond putting a seam where the eye can see the ring turn.
   const letter: 'A' | 'B' = aShare === 1 ? 'A' : 'B';
   return { splitAt: 0.5, firstLetter: letter, secondLetter: letter };
 }
