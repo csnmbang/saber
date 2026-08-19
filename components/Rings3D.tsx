@@ -56,6 +56,47 @@ function Glare({ spin }: { spin: number }) {
   return <pointLight ref={light} intensity={170} distance={30} decay={1.3} color="#fff4e2" />;
 }
 
+/**
+ * The strobe ring: marks outside the outermost key, the way the pitch strobe
+ * sits on the rim of a 1200. It turns with the platter, and unlike the rings it
+ * is not rotationally symmetric under a small turn, so it is what actually makes
+ * the rotation legible. Every ninth mark is larger, giving four quadrant marks
+ * to track.
+ *
+ * These carry no reading. They are deliberately the only thing on the page
+ * drawn in plain cream rather than a key's hue, so nothing here can be mistaken
+ * for data.
+ */
+const STROBE_RADIUS = 5.72;
+const STROBE_MARKS = 36;
+
+function StrobeRing() {
+  return (
+    <group>
+      {Array.from({ length: STROBE_MARKS }, (_, i) => {
+        const angle = (i / STROBE_MARKS) * TWO_PI;
+        const quadrant = i % 9 === 0;
+        return (
+          <mesh
+            key={i}
+            position={[Math.cos(angle) * STROBE_RADIUS, Math.sin(angle) * STROBE_RADIUS, 0]}
+          >
+            <sphereGeometry args={[quadrant ? 0.075 : 0.042, 10, 10]} />
+            <meshStandardMaterial
+              color="#ede7db"
+              emissive="#ede7db"
+              emissiveIntensity={quadrant ? 0.55 : 0.3}
+              roughness={0.5}
+              transparent
+              opacity={quadrant ? 0.8 : 0.45}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 /** One arc of one ring: a partial torus, rotated to start where the last ended. */
 function Arc({
   radius,
@@ -105,6 +146,7 @@ function RingStack({ vitals }: { vitals: Vitals }) {
 
   return (
     <group ref={platter}>
+      <StrobeRing />
       {Array.from({ length: 12 }, (_, i) => {
         const number = i + 1;
         const radius = INNER_R + i * RING_GAP;
@@ -159,7 +201,7 @@ export default function Rings3D({ vitals }: { vitals: Vitals }) {
   return (
     <div className="w-full max-w-[480px] aspect-square">
       <Canvas
-        camera={{ position: [0, 1.6, 15.2], fov: 42 }}
+        camera={{ position: [0, 1.7, 16.4], fov: 42 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
       >
