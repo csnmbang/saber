@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DropZone } from '@/components/DropZone';
-import { Rings2D } from '@/components/Rings2D';
+import { HarmonicRings } from '@/components/HarmonicRings';
 import { Tracklist } from '@/components/Tracklist';
 import { VitalsPanel } from '@/components/VitalsPanel';
 import { parseRekordboxTxt } from '@/lib/parse/rekordbox';
@@ -87,7 +87,7 @@ export default function Home() {
                 {analysis.parsed.tracks.length} tracks · {analysis.parsed.source}
               </p>
             </div>
-            <Rings2D vitals={analysis.vitals} />
+            <HarmonicRings vitals={analysis.vitals} />
           </section>
 
           {!analysis.parsed.hasEnoughKeys && (

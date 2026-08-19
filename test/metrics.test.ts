@@ -145,6 +145,18 @@ describe('computeVitals', () => {
   });
 });
 
+describe('average tempo', () => {
+  it('reports the mean BPM the rings turn at', () => {
+    const vitals = computeVitals(makeSet([[120, '8A'], [124, '8A'], [128, '8A'], [132, '8A']]));
+    expect(vitals.components.bpm?.mean).toBe(126);
+  });
+
+  it('has no mean to report when nothing carried a tempo', () => {
+    const vitals = computeVitals(makeSet([[null, '8A'], [null, '9A']]));
+    expect(vitals.components.bpm).toBeNull();
+  });
+});
+
 describe('spearman', () => {
   it('handles ties without dividing by zero', () => {
     expect(spearman([1, 2, 3, 4], [120, 120, 120, 120])).toBeNull();

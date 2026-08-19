@@ -26,7 +26,15 @@ export type Vitals = {
     transitions: Record<TransitionKind, number> & { classified: number };
     boldShare: number | null;
     wideShare: number | null;
-    bpm: { min: number; max: number; median: number; p10: number; p90: number; spread: number } | null;
+    bpm: {
+      min: number;
+      max: number;
+      mean: number;
+      median: number;
+      p10: number;
+      p90: number;
+      spread: number;
+    } | null;
     distinctKeys: number;
     /** Share of set time spent in each Camelot number, 1-12. Drives the rings. */
     keyTimeShare: Record<number, number>;
@@ -118,6 +126,7 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
     ? {
         min: bpmValues[0],
         max: bpmValues[bpmValues.length - 1],
+        mean: bpmValues.reduce((sum, v) => sum + v, 0) / bpmValues.length,
         median: percentile(bpmValues, 0.5),
         p10: percentile(bpmValues, 0.1),
         p90: percentile(bpmValues, 0.9),
