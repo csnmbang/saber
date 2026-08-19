@@ -19,8 +19,9 @@ export function RingLegend({ vitals }: { vitals: Vitals }) {
   return (
     <div className="mt-5 w-full max-w-[480px]">
       <p className="label">
-        ring = key · thickness = time
-        {bpm ? ` · turning at ${bpm.mean.toFixed(0)} bpm` : ''}
+        {`ring = key · thickness = time${
+          bpm ? ` · turning at ${bpm.mean.toFixed(0)} bpm` : ''
+        }`}
       </p>
       <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
         {played.map(([key, share]) => {

@@ -2,29 +2,14 @@
 
 import { useState } from 'react';
 import { DropZone } from '@/components/DropZone';
-import { HarmonicRings } from '@/components/HarmonicRings';
-import { RingLegend } from '@/components/RingLegend';
+import { SetSummary } from '@/components/SetSummary';
+import { ShareLink } from '@/components/ShareLink';
 import { Tracklist } from '@/components/Tracklist';
-import { VitalsPanel } from '@/components/VitalsPanel';
 import { parseRekordboxTxt } from '@/lib/parse/rekordbox';
 import type { ParseResult } from '@/lib/parse/types';
 import { computeVitals, type Vitals } from '@/lib/metrics/vitals';
-import { resolveArchetype, type Archetype } from '@/lib/metrics/archetype';
 
-type Analysis = { parsed: ParseResult; vitals: Vitals; archetype: Archetype };
-
-const READING_LABEL: Record<string, string> = {
-  harmonic: 'Harmonic',
-  risk: 'Risk',
-  range: 'Range',
-  climb: 'Climb',
-};
-
-function readingValue(vitals: Vitals, key: string): string {
-  if (key === 'climb') return vitals.climb === null ? '—' : vitals.climb.toFixed(2);
-  const v = vitals[key as 'harmonic' | 'risk' | 'range'];
-  return v === null ? '—' : `${Math.round(v * 100)}%`;
-}
+type Analysis = { parsed: ParseResult; vitals: Vitals };
 
 export default function Home() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -39,8 +24,7 @@ export default function Home() {
         setAnalysis(null);
         return;
       }
-      const vitals = computeVitals(parsed.tracks);
-      setAnalysis({ parsed, vitals, archetype: resolveArchetype(vitals) });
+      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks) });
     } catch {
       setError('That file would not read. Export it again from rekordbox as a .txt.');
       setAnalysis(null);
@@ -71,28 +55,10 @@ export default function Home() {
 
       {analysis && (
         <>
-          <section className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start">
-            <div>
-              <p className="label">Archetype</p>
-              <h2 className="display text-6xl mt-1">{analysis.archetype.name}</h2>
-              <p className="mt-3 max-w-md">{analysis.archetype.blurb}</p>
-              <dl className="mt-6 flex gap-10">
-                {analysis.archetype.drivers.map((key) => (
-                  <div key={key}>
-                    <dt className="label">{READING_LABEL[key]}</dt>
-                    <dd className="readout text-3xl">{readingValue(analysis.vitals, key)}</dd>
-                  </div>
-                ))}
-              </dl>
-              <p className="label mt-8">
-                {analysis.parsed.tracks.length} tracks · {analysis.parsed.source}
-              </p>
-            </div>
-            <div>
-              <HarmonicRings vitals={analysis.vitals} />
-              <RingLegend vitals={analysis.vitals} />
-            </div>
-          </section>
+          <SetSummary
+            vitals={analysis.vitals}
+            meta={`${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`}
+          />
 
           {!analysis.parsed.hasEnoughKeys && (
             <section className="border border-line bg-surface p-5">
@@ -108,8 +74,8 @@ export default function Home() {
             </section>
           )}
 
-          <VitalsPanel vitals={analysis.vitals} />
           <Tracklist tracks={analysis.parsed.tracks} />
+          <ShareLink vitals={analysis.vitals} />
         </>
       )}
     </main>

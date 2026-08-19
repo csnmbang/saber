@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { DoubleSide, type Group } from 'three';
+import { DoubleSide, type Group, type PointLight } from 'three';
 import { camelotColorThree, EMPTY_RING_THREE } from '@/lib/ui/colors';
 import type { Vitals } from '@/lib/metrics/vitals';
 
@@ -28,7 +28,30 @@ function spinFor(bpm: number | null | undefined): number {
   return ((bpm / 60) * TWO_PI) / BEATS_PER_TURN;
 }
 
-/** One arc of one ring: a partial torus, rotated to start where the last arc ended. */
+/** Distance the travelling highlight orbits at, and how hot it burns. */
+const GLARE_RADIUS = 7.5;
+const GLARE_HEIGHT = 3.4;
+
+/**
+ * A ring is rotationally symmetric, so turning it under a fixed lamp looks
+ * exactly like not turning it. The motion has to come from the light: this
+ * orbits the stack at the same tempo, raking a highlight across the tubes the
+ * way a lamp does across vinyl.
+ */
+function Glare({ spin }: { spin: number }) {
+  const light = useRef<PointLight>(null);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * spin;
+    light.current?.position.set(
+      Math.cos(t) * GLARE_RADIUS,
+      Math.sin(t) * GLARE_RADIUS,
+      GLARE_HEIGHT,
+    );
+  });
+  return <pointLight ref={light} intensity={90} distance={26} decay={1.4} color="#fff6e6" />;
+}
+
+/** One arc of one ring: a partial torus, rotated to start where the last ended. */
 function Arc({
   radius,
   tube,
@@ -45,7 +68,7 @@ function Arc({
   opacity?: number;
 }) {
   if (fraction <= 0) return null;
-  const tubular = Math.max(8, Math.ceil(180 * fraction));
+  const tubular = Math.max(6, Math.ceil(180 * fraction));
   return (
     <mesh rotation={[0, 0, offset * TWO_PI]}>
       <torusGeometry args={[radius, tube, 14, tubular, fraction * TWO_PI]} />
@@ -53,8 +76,8 @@ function Arc({
         color={color}
         emissive={color}
         emissiveIntensity={0.35}
-        roughness={0.4}
-        metalness={0.15}
+        roughness={0.22}
+        metalness={0.6}
         transparent={opacity < 1}
         opacity={opacity}
         side={DoubleSide}
@@ -64,10 +87,10 @@ function Arc({
 }
 
 function RingStack({ vitals }: { vitals: Vitals }) {
-  const { keyTimeShare, keyTimeShareByKey } = vitals.components;
+  const { keyTimeShare, keyTimeShareByKey, bpm } = vitals.components;
   const max = Math.max(...Object.values(keyTimeShare));
   const platter = useRef<Group>(null);
-  const spin = spinFor(vitals.components.bpm?.mean);
+  const spin = spinFor(bpm?.mean);
 
   // The outer group holds the lean; this one turns inside it, so the stack
   // spins in its own plane rather than orbiting the camera.
@@ -97,23 +120,22 @@ function RingStack({ vitals }: { vitals: Vitals }) {
         }
 
         const tube = MIN_TUBE + (share / max) * (MAX_TUBE - MIN_TUBE);
-        const aFraction = (keyTimeShareByKey[`${number}A`] ?? 0) / share;
-        const bFraction = 1 - aFraction;
+        const aShare = (keyTimeShareByKey[`${number}A`] ?? 0) / share;
 
         return (
           <group key={number}>
             <Arc
               radius={radius}
               tube={tube}
-              fraction={aFraction}
+              fraction={aShare}
               offset={0}
               color={camelotColorThree(number, 'A')}
             />
             <Arc
               radius={radius}
               tube={tube}
-              fraction={bFraction}
-              offset={aFraction}
+              fraction={1 - aShare}
+              offset={aShare}
               color={camelotColorThree(number, 'B')}
             />
           </group>
@@ -124,10 +146,9 @@ function RingStack({ vitals }: { vitals: Vitals }) {
 }
 
 /**
- * The Harmonic Rings as geometry, leaning back on a deck and turning slowly.
- * The lean is what earns the third dimension: face-on, a torus reads exactly
- * like the flat SVG. Tilted and turning, the tube catches light and the seam
- * between a key's minor and major halves sweeps past.
+ * The Harmonic Rings as geometry, leaning back on a deck and turning at the
+ * set's own tempo. The lean is what earns the third dimension: face-on, a torus
+ * reads exactly like the flat SVG.
  */
 export default function Rings3D({ vitals }: { vitals: Vitals }) {
   return (
@@ -141,6 +162,7 @@ export default function Rings3D({ vitals }: { vitals: Vitals }) {
         <directionalLight position={[6, 10, 9]} intensity={1.1} />
         <pointLight position={[-9, -4, 7]} intensity={0.6} />
         <group rotation={[TILT, 0, 0]}>
+          <Glare spin={spinFor(vitals.components.bpm?.mean)} />
           <RingStack vitals={vitals} />
         </group>
         <OrbitControls
