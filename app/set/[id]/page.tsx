@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { SetSummary } from '@/components/SetSummary';
+import { PublishToggle } from '@/components/PublishToggle';
 import { Tracklist } from '@/components/Tracklist';
 import { decodeGrants, holdsGrant, SESSION_COOKIE } from '@/lib/session';
 import { dbConfigured, sql } from '@/lib/db';
@@ -82,16 +83,15 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
 
       {tracks.length > 0 && <Tracklist tracks={tracks} />}
 
-      <div className="flex flex-wrap items-baseline gap-6">
+      {isOwner && <PublishToggle id={set.id} isPublic={set.is_public} />}
+
+      <div>
         <Link
           href="/sets"
           className="label border border-line px-4 py-2 hover:border-text hover:text-text"
         >
           Your sets
         </Link>
-        {isOwner && !set.is_public && (
-          <p className="label">Only you can open this. It is not published.</p>
-        )}
       </div>
     </main>
   );
