@@ -145,33 +145,6 @@ describe('computeVitals', () => {
   });
 });
 
-describe('key segments', () => {
-  it('marks where in the set each key was playing', () => {
-    const vitals = computeVitals(makeSet([[124, '8A'], [124, '9A'], [124, '8A'], [124, '8A']]));
-    expect(vitals.components.keySegments).toEqual([
-      { camelot: '8A', from: 0, to: 0.25 },
-      { camelot: '9A', from: 0.25, to: 0.5 },
-      { camelot: '8A', from: 0.5, to: 1 },
-    ]);
-  });
-
-  it('weights the arcs by track length, not track count', () => {
-    const tracks = makeSet([[124, '8A'], [124, '9A']]);
-    tracks[0].durationS = 300;
-    tracks[1].durationS = 100;
-    const [first, second] = computeVitals(tracks).components.keySegments;
-    expect(first).toEqual({ camelot: '8A', from: 0, to: 0.75 });
-    expect(second).toEqual({ camelot: '9A', from: 0.75, to: 1 });
-  });
-
-  it('leaves a hole in the ring for tracks with no key', () => {
-    const vitals = computeVitals(makeSet([[124, '8A'], [124, null], [124, '8A']]));
-    expect(vitals.components.keySegments).toHaveLength(2);
-    expect(vitals.components.keySegments[0].to).toBeCloseTo(1 / 3);
-    expect(vitals.components.keySegments[1].from).toBeCloseTo(2 / 3);
-  });
-});
-
 describe('average tempo', () => {
   it('reports the mean BPM the rings turn at', () => {
     const vitals = computeVitals(makeSet([[120, '8A'], [124, '8A'], [128, '8A'], [132, '8A']]));

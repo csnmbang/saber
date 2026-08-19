@@ -11,9 +11,6 @@ import {
 
 export type SetShape = 'front-loaded' | 'steady climb' | 'plateau' | 'wave';
 
-/** One unbroken stretch of the set spent in one key. `from`/`to` are 0-1. */
-export type KeySegment = { camelot: string; from: number; to: number };
-
 export type Vitals = {
   trackCount: number;
   keyCoverage: number;
@@ -43,13 +40,6 @@ export type Vitals = {
     keyTimeShare: Record<number, number>;
     /** The same share split by full key, e.g. '8A' — the A/B mix inside each ring. */
     keyTimeShareByKey: Record<string, number>;
-    /**
-     * Where each key was in play, as a fraction of the way through the set.
-     * Consecutive tracks in the same key merge into one stretch. This is what
-     * makes a ring readable: the angle is the night, so a gap is time spent
-     * somewhere else.
-     */
-    keySegments: KeySegment[];
     /** Where the fastest track sat, 0 (first) to 1 (last). */
     peakPosition: number | null;
     shape: SetShape | null;
@@ -191,24 +181,6 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
     }
   }
 
-  // --- when each key was in play ---------------------------------------------
-  const totalTime = tracks.reduce((sum, t) => sum + (t.durationS ?? 1), 0);
-  const keySegments: KeySegment[] = [];
-  let cursor = 0;
-  for (const track of tracks) {
-    const weight = track.durationS ?? 1;
-    const from = cursor / totalTime;
-    cursor += weight;
-    const to = cursor / totalTime;
-    if (!track.camelot) continue;
-    const last = keySegments[keySegments.length - 1];
-    if (last && last.camelot === track.camelot && last.to === from) {
-      last.to = to;
-    } else {
-      keySegments.push({ camelot: track.camelot, from, to });
-    }
-  }
-
   return {
     trackCount: tracks.length,
     keyCoverage,
@@ -224,7 +196,6 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
       distinctKeys,
       keyTimeShare,
       keyTimeShareByKey,
-      keySegments,
       peakPosition,
       shape: shapeOf(bpm?.spread ?? 0, climb, peakPosition),
     },

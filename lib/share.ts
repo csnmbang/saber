@@ -132,7 +132,6 @@ export function decodeShare(code: string): Vitals | null {
       distinctKeys,
       keyTimeShare,
       keyTimeShareByKey,
-      keySegments: [],
       peakPosition: payload.c ? payload.c[1] / 100 : null,
       shape: payload.s && SHAPES.includes(payload.s) ? payload.s : null,
     },
