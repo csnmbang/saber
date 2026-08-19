@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { resolveArchetype } from '@/lib/metrics/archetype';
 import { decodeShare } from '@/lib/share';
+import { antonFont, spaceMonoFont } from '@/lib/og/fonts';
 import { ringsDataUri } from '@/lib/ui/ringsSvg';
 
 export const alt = 'A set read by Saber';
@@ -8,17 +9,15 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 const BOX = 500;
+const CREAM = '#EDE7DB';
+const MUTED = '#8A8A8F';
 
-/**
- * The card is the flat rings, the same SVG the result page draws, so a set
- * looks the same in a timeline as it does on the site. No WebGL, so links
- * unfurl fast.
- */
 export default async function Image({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const vitals = decodeShare(code);
 
   if (!vitals) {
+    const anton = await antonFont();
     return new ImageResponse(
       (
         <div
@@ -29,15 +28,16 @@ export default async function Image({ params }: { params: Promise<{ code: string
             alignItems: 'center',
             justifyContent: 'center',
             background: '#0B0B0C',
-            color: '#EDE7DB',
-            fontSize: 64,
-            letterSpacing: 4,
+            color: CREAM,
+            fontFamily: 'Anton',
+            fontSize: 96,
+            textTransform: 'uppercase',
           }}
         >
-          SABER
+          Saber
         </div>
       ),
-      size,
+      { ...size, fonts: [{ name: 'Anton', data: anton, weight: 400 }] },
     );
   }
 
@@ -45,7 +45,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
   const { bpm } = vitals.components;
 
   // Satori wants one child per element, so anything interpolated is joined here.
-  const meta = `${vitals.trackCount} TRACKS${bpm ? ` \u00b7 ${bpm.mean.toFixed(0)} BPM` : ''}`;
+  const meta = `${vitals.trackCount} TRACKS${bpm ? ` · ${bpm.mean.toFixed(0)} BPM` : ''}`;
 
   const readings: [string, string][] = [
     ['HARMONIC', vitals.harmonic === null ? '—' : `${Math.round(vitals.harmonic * 100)}%`],
@@ -53,6 +53,8 @@ export default async function Image({ params }: { params: Promise<{ code: string
     ['RANGE', vitals.range === null ? '—' : `${Math.round(vitals.range * 100)}%`],
     ['CLIMB', vitals.climb === null ? '—' : vitals.climb.toFixed(2)],
   ];
+
+  const [anton, mono] = await Promise.all([antonFont(), spaceMonoFont()]);
 
   return new ImageResponse(
     (
@@ -63,27 +65,56 @@ export default async function Image({ params }: { params: Promise<{ code: string
           display: 'flex',
           alignItems: 'center',
           background: '#0B0B0C',
-          color: '#EDE7DB',
+          color: CREAM,
           padding: 64,
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-          <div style={{ fontSize: 20, letterSpacing: 6, color: '#8A8A8F' }}>SABER</div>
-          <div style={{ fontSize: 76, letterSpacing: 1, marginTop: 18, lineHeight: 1 }}>
-            {archetype.name.toUpperCase()}
+          <div style={{ fontFamily: 'Space Mono', fontSize: 20, letterSpacing: 6, color: MUTED }}>
+            SABER
           </div>
-          <div style={{ fontSize: 24, color: '#8A8A8F', marginTop: 18, maxWidth: 460 }}>
+          <div
+            style={{
+              fontFamily: 'Anton',
+              fontSize: 76,
+              textTransform: 'uppercase',
+              marginTop: 18,
+              lineHeight: 1,
+            }}
+          >
+            {archetype.name}
+          </div>
+          <div
+            style={{
+              fontFamily: 'Space Mono',
+              fontSize: 22,
+              color: MUTED,
+              marginTop: 18,
+              maxWidth: 460,
+              lineHeight: 1.4,
+            }}
+          >
             {archetype.blurb}
           </div>
           <div style={{ display: 'flex', gap: 40, marginTop: 44 }}>
             {readings.map(([label, value]) => (
               <div key={label} style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 15, letterSpacing: 3, color: '#8A8A8F' }}>{label}</div>
-                <div style={{ fontSize: 34, marginTop: 6 }}>{value}</div>
+                <div style={{ fontFamily: 'Space Mono', fontSize: 15, letterSpacing: 3, color: MUTED }}>
+                  {label}
+                </div>
+                <div style={{ fontFamily: 'Space Mono', fontSize: 34, marginTop: 6 }}>{value}</div>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: 17, letterSpacing: 3, color: '#8A8A8F', marginTop: 40 }}>
+          <div
+            style={{
+              fontFamily: 'Space Mono',
+              fontSize: 17,
+              letterSpacing: 3,
+              color: MUTED,
+              marginTop: 40,
+            }}
+          >
             {meta}
           </div>
         </div>
@@ -91,6 +122,12 @@ export default async function Image({ params }: { params: Promise<{ code: string
         <img src={ringsDataUri(vitals)} width={BOX} height={BOX} alt="" />
       </div>
     ),
-    size,
+    {
+      ...size,
+      fonts: [
+        { name: 'Anton', data: anton, weight: 400 },
+        { name: 'Space Mono', data: mono, weight: 400 },
+      ],
+    },
   );
 }
