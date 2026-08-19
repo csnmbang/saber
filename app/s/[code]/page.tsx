@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { SaveImage } from '@/components/SaveImage';
 import { SetSummary } from '@/components/SetSummary';
 import { resolveArchetype } from '@/lib/metrics/archetype';
 import { decodeShare } from '@/lib/share';
@@ -33,6 +34,7 @@ export default async function SharedSet({ params }: { params: Promise<{ code: st
       {vitals ? (
         <>
           <SetSummary vitals={vitals} meta={`${vitals.trackCount} tracks`} />
+          <SaveImage vitals={vitals} meta={`${vitals.trackCount} tracks`} />
           <div>
             <Link
               href="/"

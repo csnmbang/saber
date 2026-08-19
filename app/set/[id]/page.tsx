@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { SaveImage } from '@/components/SaveImage';
 import { SetSummary } from '@/components/SetSummary';
 import { PublishToggle } from '@/components/PublishToggle';
 import { Tracklist } from '@/components/Tracklist';
@@ -80,6 +81,7 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
         vitals={set.vitals}
         meta={`${tracks.length} tracks · ${set.source} · ${played}`}
       />
+      <SaveImage vitals={set.vitals} meta={`${tracks.length} tracks · ${played}`} />
 
       {tracks.length > 0 && <Tracklist tracks={tracks} />}
 

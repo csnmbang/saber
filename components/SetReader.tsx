@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DropZone } from '@/components/DropZone';
+import { SaveImage } from '@/components/SaveImage';
 import { SaveSet } from '@/components/SaveSet';
 import { SetSummary } from '@/components/SetSummary';
 import { ShareLink } from '@/components/ShareLink';
@@ -76,6 +77,12 @@ export function SetReader({ canSave }: { canSave: boolean }) {
           )}
 
           <Tracklist tracks={analysis.parsed.tracks} />
+          <SaveImage
+            vitals={analysis.vitals}
+            meta={`${analysis.parsed.tracks.length} tracks${
+              analysis.vitals.components.bpm ? ` · ${analysis.vitals.components.bpm.mean.toFixed(0)} bpm` : ''
+            }`}
+          />
           <div className="flex flex-wrap gap-10">
             <ShareLink vitals={analysis.vitals} />
             {canSave && <SaveSet tracks={analysis.parsed.tracks} source={analysis.parsed.source} />}
