@@ -4,7 +4,8 @@ import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { DoubleSide, type Group, type PointLight } from 'three';
-import { camelotColorThree, camelotColorThreeShaded, EMPTY_RING_THREE } from '@/lib/ui/colors';
+import { camelotColorThree, EMPTY_RING_THREE } from '@/lib/ui/colors';
+import { ringSplit } from '@/lib/ui/ringSplit';
 import { platterAngle, spinFor } from '@/lib/ui/spin';
 import type { Vitals } from '@/lib/metrics/vitals';
 
@@ -43,57 +44,6 @@ function Glare({ spin }: { spin: number }) {
   return <pointLight ref={light} intensity={170} distance={30} decay={1.3} color="#fff4e2" />;
 }
 
-/**
- * The strobe ring: marks outside the outermost key, the way the pitch strobe
- * sits on the rim of a 1200. It turns with the platter, and unlike the rings it
- * is not rotationally symmetric under a small turn, so it is what actually makes
- * the rotation legible. Every ninth mark is larger, giving four quadrant marks
- * to track.
- *
- * These carry no reading. They are deliberately the only thing on the page
- * drawn in plain cream rather than a key's hue, so nothing here can be mistaken
- * for data.
- *
- * Flat dashes, not spheres — a sphere is round from every angle and catches
- * light all over its surface, which reads as a small glowing thing sitting in
- * space rather than a mark printed on a rim. A thin tangent-aligned box only
- * catches light edge-on, the way an etched line on a platter does.
- */
-const STROBE_RADIUS = 5.72;
-const STROBE_MARKS = 36;
-const MARK_LENGTH = 0.22;
-const MARK_WIDTH = 0.05;
-const MARK_THICKNESS = 0.02;
-
-function StrobeRing() {
-  return (
-    <group>
-      {Array.from({ length: STROBE_MARKS }, (_, i) => {
-        const angle = (i / STROBE_MARKS) * TWO_PI;
-        const quadrant = i % 9 === 0;
-        return (
-          <mesh
-            key={i}
-            position={[Math.cos(angle) * STROBE_RADIUS, Math.sin(angle) * STROBE_RADIUS, 0]}
-            rotation={[0, 0, angle]}
-          >
-            <boxGeometry args={[MARK_WIDTH, quadrant ? MARK_LENGTH * 1.6 : MARK_LENGTH, MARK_THICKNESS]} />
-            <meshStandardMaterial
-              color="#ede7db"
-              emissive="#ede7db"
-              emissiveIntensity={quadrant ? 0.12 : 0.05}
-              roughness={0.35}
-              metalness={0.15}
-              transparent
-              opacity={quadrant ? 0.85 : 0.5}
-            />
-          </mesh>
-        );
-      })}
-    </group>
-  );
-}
-
 /** One arc of one ring: a partial torus, rotated to start where the last ended. */
 function Arc({
   radius,
@@ -129,6 +79,60 @@ function Arc({
   );
 }
 
+/**
+ * The visible break at each end of an arc, as a fraction of the full circle.
+ * This is what makes rotation legible: a closed torus turning about its own
+ * axis is pixel-identical frame to frame, so without a cut in it a ring looks
+ * completely still even while spinning.
+ */
+const CUT = 0.016;
+
+/**
+ * One ring, always drawn as two arcs with a gap at each junction.
+ *
+ * The two arcs take different colors only when a key was genuinely played in
+ * both its minor and its major — that is the sole thing a second color ever
+ * means here. When a key was played in only one of them, both arcs are that
+ * one color and the ring reads as a single hue; the cut alone carries the
+ * motion.
+ */
+function SplitRing({
+  radius,
+  tube,
+  splitAt,
+  firstColor,
+  secondColor,
+  opacity,
+}: {
+  radius: number;
+  tube: number;
+  splitAt: number;
+  firstColor: string;
+  secondColor: string;
+  opacity?: number;
+}) {
+  return (
+    <group>
+      <Arc
+        radius={radius}
+        tube={tube}
+        fraction={splitAt - CUT}
+        offset={CUT / 2}
+        color={firstColor}
+        opacity={opacity}
+      />
+      <Arc
+        radius={radius}
+        tube={tube}
+        fraction={1 - splitAt - CUT}
+        offset={splitAt + CUT / 2}
+        color={secondColor}
+        opacity={opacity}
+      />
+    </group>
+  );
+}
+
 function RingStack({ vitals }: { vitals: Vitals }) {
   const { keyTimeShare, keyTimeShareByKey, bpm } = vitals.components;
   const max = Math.max(...Object.values(keyTimeShare));
@@ -143,7 +147,6 @@ function RingStack({ vitals }: { vitals: Vitals }) {
 
   return (
     <group ref={platter}>
-      <StrobeRing />
       {Array.from({ length: 12 }, (_, i) => {
         const number = i + 1;
         const radius = INNER_R + i * RING_GAP;
@@ -151,13 +154,13 @@ function RingStack({ vitals }: { vitals: Vitals }) {
 
         if (share === 0 || max === 0) {
           return (
-            <Arc
+            <SplitRing
               key={number}
               radius={radius}
               tube={MIN_TUBE}
-              fraction={1}
-              offset={0}
-              color={EMPTY_RING_THREE}
+              splitAt={0.5}
+              firstColor={EMPTY_RING_THREE}
+              secondColor={EMPTY_RING_THREE}
               opacity={0.09}
             />
           );
@@ -165,34 +168,21 @@ function RingStack({ vitals }: { vitals: Vitals }) {
 
         const tube = MIN_TUBE + (share / max) * (MAX_TUBE - MIN_TUBE);
         const aShare = (keyTimeShareByKey[`${number}A`] ?? 0) / share;
-        const hasBothLetters = aShare > 0 && aShare < 1;
 
-        // A real A/B split already gives the ring a seam — two true colors
-        // meeting. All-one-letter has no such seam, so it gets a fabricated
-        // one: the same hue at two shades, still one closed ring, still one
-        // color at a glance, but no longer identical to itself as it turns.
-        const [firstColor, secondColor] = hasBothLetters
-          ? [camelotColorThree(number, 'A'), camelotColorThree(number, 'B')]
-          : (() => {
-              const letter = aShare === 1 ? 'A' : 'B';
-              return [
-                camelotColorThreeShaded(number, letter, 13),
-                camelotColorThreeShaded(number, letter, -13),
-              ];
-            })();
-        const firstFraction = hasBothLetters ? aShare : 0.5;
+        // Two colors mean exactly one thing: this key was played in both its
+        // minor and its major. See lib/ui/ringSplit.ts — the rule lives there
+        // so it can be tested rather than eyeballed.
+        const split = ringSplit(aShare);
 
         return (
-          <group key={number}>
-            <Arc radius={radius} tube={tube} fraction={firstFraction} offset={0} color={firstColor} />
-            <Arc
-              radius={radius}
-              tube={tube}
-              fraction={1 - firstFraction}
-              offset={firstFraction}
-              color={secondColor}
-            />
-          </group>
+          <SplitRing
+            key={number}
+            radius={radius}
+            tube={tube}
+            splitAt={split.splitAt}
+            firstColor={camelotColorThree(number, split.firstLetter)}
+            secondColor={camelotColorThree(number, split.secondLetter)}
+          />
         );
       })}
     </group>
