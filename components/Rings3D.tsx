@@ -28,9 +28,14 @@ function spinFor(bpm: number | null | undefined): number {
   return ((bpm / 60) * TWO_PI) / BEATS_PER_TURN;
 }
 
-/** Distance the travelling highlight orbits at, and how hot it burns. */
-const GLARE_RADIUS = 7.5;
-const GLARE_HEIGHT = 3.4;
+/**
+ * The travelling highlight. It orbits close to the stack and burns hard, because
+ * it is the only thing carrying the rotation: a closed ring turned about its own
+ * axis is pixel-identical frame to frame, so a soft sheen reads as a still
+ * image. This one has to be unmistakable.
+ */
+const GLARE_RADIUS = 7.2;
+const GLARE_HEIGHT = 3.2;
 
 /**
  * A ring is rotationally symmetric, so turning it under a fixed lamp looks
@@ -48,7 +53,7 @@ function Glare({ spin }: { spin: number }) {
       GLARE_HEIGHT,
     );
   });
-  return <pointLight ref={light} intensity={90} distance={26} decay={1.4} color="#fff6e6" />;
+  return <pointLight ref={light} intensity={170} distance={30} decay={1.3} color="#fff4e2" />;
 }
 
 /** One arc of one ring: a partial torus, rotated to start where the last ended. */
@@ -75,9 +80,9 @@ function Arc({
       <meshStandardMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={0.35}
-        roughness={0.22}
-        metalness={0.6}
+        emissiveIntensity={0.3}
+        roughness={0.16}
+        metalness={0.7}
         transparent={opacity < 1}
         opacity={opacity}
         side={DoubleSide}
@@ -158,9 +163,8 @@ export default function Rings3D({ vitals }: { vitals: Vitals }) {
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
       >
-        <ambientLight intensity={0.85} />
-        <directionalLight position={[6, 10, 9]} intensity={1.1} />
-        <pointLight position={[-9, -4, 7]} intensity={0.6} />
+        <ambientLight intensity={0.72} />
+        <directionalLight position={[6, 10, 9]} intensity={0.9} />
         <group rotation={[TILT, 0, 0]}>
           <Glare spin={spinFor(vitals.components.bpm?.mean)} />
           <RingStack vitals={vitals} />
