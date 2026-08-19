@@ -16,6 +16,7 @@ function makeSet(rows: [number | null, string | null][]): ParsedTrack[] {
     bpm,
     camelot,
     durationS: 360,
+    genre: null,
   }));
 }
 

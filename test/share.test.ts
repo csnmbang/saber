@@ -60,8 +60,8 @@ describe('share links', () => {
 
   it('survives a set with no tempo and no keys', () => {
     const bare = computeVitals([
-      { position: 1, title: 'a', artist: null, bpm: null, camelot: null, durationS: null },
-      { position: 2, title: 'b', artist: null, bpm: null, camelot: null, durationS: null },
+      { position: 1, title: 'a', artist: null, bpm: null, camelot: null, durationS: null, genre: null },
+      { position: 2, title: 'b', artist: null, bpm: null, camelot: null, durationS: null, genre: null },
     ]);
     const decoded = decodeShare(encodeShare(bare))!;
     expect(decoded.harmonic).toBeNull();

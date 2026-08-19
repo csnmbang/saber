@@ -8,6 +8,8 @@ export type ParsedTrack = {
   /** Normalized Camelot, e.g. '8A'. Null when the export had no usable key. */
   camelot: string | null;
   durationS: number | null;
+  /** Whatever rekordbox has in its Genre column — a tag, not a taxonomy. */
+  genre: string | null;
 };
 
 export type ParseSource = 'rekordbox' | 'serato' | 'traktor';
@@ -28,7 +30,7 @@ export type ParseResult = {
   warnings: string[];
 };
 
-export type TrackField = 'position' | 'title' | 'artist' | 'bpm' | 'key' | 'time';
+export type TrackField = 'position' | 'title' | 'artist' | 'bpm' | 'key' | 'time' | 'genre';
 
 /** Below this share of keyed tracks we do not report harmonic readings at all. */
 export const MIN_KEY_COVERAGE = 0.6;

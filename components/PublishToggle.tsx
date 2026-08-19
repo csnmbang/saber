@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { trackPublish } from '@/lib/analytics';
 
 /**
  * Publishing is a separate, later, explicit action, and the copy says exactly
@@ -23,6 +24,7 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
         body: JSON.stringify({ isPublic: next }),
       });
       if (!response.ok) throw new Error('failed');
+      trackPublish({ isPublic: next });
       router.refresh();
     } catch {
       setFailed(true);

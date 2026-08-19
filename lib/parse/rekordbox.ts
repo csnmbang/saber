@@ -18,6 +18,7 @@ const HEADER_ALIASES: Record<TrackField, string[]> = {
   bpm: ['bpm', 'tempo'],
   key: ['key', 'initialkey', 'tonality', 'musicalkey'],
   time: ['time', 'tracktime', 'duration', 'length', 'totaltime'],
+  genre: ['genre', 'genres', 'style'],
 };
 
 function normalizeHeader(h: string): string {
@@ -184,6 +185,7 @@ export function parseRekordboxTxt(input: ArrayBuffer | Uint8Array | string): Par
     const artist = cell(row, 'artist');
     const bpm = toNumber(cell(row, 'bpm'));
     const durationS = toSeconds(cell(row, 'time'));
+    const genre = cell(row, 'genre');
     tracks.push({
       position: tracks.length + 1,
       title,
@@ -191,6 +193,7 @@ export function parseRekordboxTxt(input: ArrayBuffer | Uint8Array | string): Par
       bpm: bpm !== null && bpm >= 20 && bpm <= 300 ? bpm : null,
       camelot: toCamelot(cell(row, 'key')),
       durationS,
+      genre: genre || null,
     });
   }
 

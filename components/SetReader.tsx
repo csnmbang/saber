@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { DropZone } from '@/components/DropZone';
+import { dominantGenre, trackReadSet } from '@/lib/analytics';
 import { SaveImage } from '@/components/SaveImage';
 import { SaveSet } from '@/components/SaveSet';
 import { SetSummary } from '@/components/SetSummary';
@@ -27,6 +28,12 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         return;
       }
       setAnalysis({ parsed, vitals: computeVitals(parsed.tracks) });
+      trackReadSet({
+        source: parsed.source,
+        trackCount: parsed.tracks.length,
+        hasEnoughKeys: parsed.hasEnoughKeys,
+        genre: dominantGenre(parsed.tracks),
+      });
     } catch {
       setError('That file would not read. Export it again from rekordbox as a .txt.');
       setAnalysis(null);

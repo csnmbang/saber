@@ -35,6 +35,9 @@ function cleanTracks(raw: unknown): ParsedTrack[] | null {
       bpm: bpm !== null && bpm >= 20 && bpm <= 300 ? bpm : null,
       camelot: typeof item.camelot === 'string' ? toCamelot(item.camelot) : null,
       durationS,
+      // Saving doesn't store genre — nothing downstream of a save reads it.
+      // It only ever feeds the anonymous read-time KPI event, client-side.
+      genre: null,
     });
   }
   return tracks;

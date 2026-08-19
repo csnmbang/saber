@@ -22,10 +22,11 @@ describe('parseRekordboxTxt — real export', () => {
       bpm: 'BPM',
       key: 'Key',
       time: 'Time',
+      genre: 'Genre',
     });
   });
 
-  it('parses the fields off a real row', () => {
+  it('parses the fields off a real row, genre included', () => {
     expect(result.tracks[1]).toEqual({
       position: 2,
       title: 'Fernet (Original Mix)',
@@ -33,6 +34,7 @@ describe('parseRekordboxTxt — real export', () => {
       bpm: 122,
       camelot: '3A',
       durationS: 8 * 60 + 25,
+      genre: 'Minimal / Deep Tech',
     });
   });
 
@@ -67,6 +69,12 @@ describe('parseRekordboxTxt — notation variants', () => {
     expect(result.tracks[0].title).toBe('Eins');
     expect(result.tracks[0].artist).toBe('Ein Kuenstler');
     expect(result.tracks[0].bpm).toBe(120);
+  });
+
+  it('leaves genre null rather than guessing when there is no genre column', () => {
+    const result = parseRekordboxTxt(fixture('classical-de.txt'));
+    expect(result.columns.genre).toBeUndefined();
+    expect(result.tracks.every((t) => t.genre === null)).toBe(true);
   });
 });
 

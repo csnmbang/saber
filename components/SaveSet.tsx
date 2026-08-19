@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { trackSaveSet } from '@/lib/analytics';
 import type { ParsedTrack, ParseSource } from '@/lib/parse/types';
 
 /**
@@ -25,6 +26,7 @@ export function SaveSet({ tracks, source }: { tracks: ParsedTrack[]; source: Par
         return;
       }
       const { id } = await response.json();
+      trackSaveSet({ source });
       router.push(`/set/${id}`);
     } catch {
       setState('failed');

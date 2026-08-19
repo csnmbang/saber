@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackSaveImage } from '@/lib/analytics';
 import { renderShareImage, type ShareImageFormat } from '@/lib/ui/shareImage';
 import { resolveArchetype } from '@/lib/metrics/archetype';
 import type { Vitals } from '@/lib/metrics/vitals';
@@ -27,6 +28,7 @@ export function SaveImage({ vitals, meta }: { vitals: Vitals; meta?: string }) {
     setPending(format);
     try {
       const blob = await renderShareImage(vitals, format, meta);
+      trackSaveImage({ format });
       download(blob, `saber-${resolveArchetype(vitals).id}-${format}.png`);
     } finally {
       setPending(null);

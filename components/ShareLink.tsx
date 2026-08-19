@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { trackCopyShareLink } from '@/lib/analytics';
 import { encodeShare } from '@/lib/share';
 import type { Vitals } from '@/lib/metrics/vitals';
 
@@ -16,6 +17,7 @@ export function ShareLink({ vitals }: { vitals: Vitals }) {
     const url = `${window.location.origin}/s/${encodeShare(vitals)}`;
     try {
       await navigator.clipboard.writeText(url);
+      trackCopyShareLink();
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {

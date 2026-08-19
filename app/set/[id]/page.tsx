@@ -60,6 +60,7 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
     bpm: row.bpm === null ? null : Number(row.bpm),
     camelot: row.camelot,
     durationS: row.duration_s,
+    genre: null, // not stored — see the note in app/api/sets/route.ts
   }));
 
   const played = new Date(set.created_at).toLocaleDateString('en-GB', {
