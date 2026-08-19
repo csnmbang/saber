@@ -7,6 +7,8 @@ import { PublishToggle } from '@/components/PublishToggle';
 import { Tracklist } from '@/components/Tracklist';
 import { decodeGrants, holdsGrant, SESSION_COOKIE } from '@/lib/session';
 import { dbConfigured, sql } from '@/lib/db';
+import { scoreAgainstBeatport } from '@/lib/beatport/match';
+import { latestBeatportChart } from '@/lib/beatport/store';
 import type { Vitals } from '@/lib/metrics/vitals';
 import type { ParsedTrack } from '@/lib/parse/types';
 
@@ -48,10 +50,13 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
   const isOwner = holdsGrant(grants, set.id, set.claim_token);
   if (!set.is_public && !isOwner) notFound();
 
-  const trackRows = (await db`
-    select position, title, artist, bpm, camelot, duration_s
-    from tracks where set_id = ${set.id}::uuid order by position
-  `) as TrackRow[];
+  const [trackRows, chart] = await Promise.all([
+    db`
+      select position, title, artist, bpm, camelot, duration_s
+      from tracks where set_id = ${set.id}::uuid order by position
+    ` as unknown as Promise<TrackRow[]>,
+    latestBeatportChart(),
+  ]);
 
   const tracks: ParsedTrack[] = trackRows.map((row) => ({
     position: row.position,
@@ -62,6 +67,8 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
     durationS: row.duration_s,
     genre: null, // not stored — see the note in app/api/sets/route.ts
   }));
+
+  const beatport = scoreAgainstBeatport(tracks, chart);
 
   const played = new Date(set.created_at).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -81,6 +88,7 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
       <SetSummary
         vitals={set.vitals}
         meta={`${tracks.length} tracks · ${set.source} · ${played}`}
+        beatport={beatport}
       />
       <SaveImage vitals={set.vitals} meta={`${tracks.length} tracks · ${played}`} />
 

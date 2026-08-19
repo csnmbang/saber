@@ -1,3 +1,4 @@
+import type { BeatportScore } from '@/lib/beatport/match';
 import type { Vitals } from '@/lib/metrics/vitals';
 
 function pct(v: number | null): string {
@@ -17,10 +18,23 @@ function Reading({ name, value, detail }: { name: string; value: string; detail:
 }
 
 /**
- * Four independent readings. No overall score, no ranking. Each one states what
- * it counted and stops there — the audience knows what a Camelot number is.
+ * Four independent readings, plus a fifth when there's a live Beatport chart
+ * to check against. No overall score, no ranking. Each one states what it
+ * counted and stops there — the audience knows what a Camelot number is.
+ *
+ * beatport is undefined while its fetch is still in flight and null once it
+ * resolves with nothing to show (no chart data on this deployment yet) — both
+ * render nothing here. That's deliberate: an absent chart is a gap in what
+ * Saber itself has, not something true about this set, so it doesn't get a
+ * "No data" row the way Harmonic or Range do for a sparse export.
  */
-export function VitalsPanel({ vitals }: { vitals: Vitals }) {
+export function VitalsPanel({
+  vitals,
+  beatport,
+}: {
+  vitals: Vitals;
+  beatport?: BeatportScore | null;
+}) {
   const c = vitals.components;
   const t = c.transitions;
 
@@ -65,6 +79,23 @@ export function VitalsPanel({ vitals }: { vitals: Vitals }) {
             : `${c.shape}, peak at ${Math.round(c.peakPosition * 100)}%`
         }
       />
+
+      {beatport && beatport.pct !== null && (
+        <Reading
+          name="Charting Now"
+          value={`${beatport.matchedCount} of ${beatport.trackCount} tracks`}
+          detail={
+            beatport.matches.length === 0
+              ? "None of these are on today's Top 100"
+              : (() => {
+                  const best = beatport.matches.reduce((min, m) =>
+                    m.entry.rank < min.entry.rank ? m : min,
+                  );
+                  return `#${best.entry.rank} in ${best.entry.chartGenre}`;
+                })()
+          }
+        />
+      )}
     </section>
   );
 }

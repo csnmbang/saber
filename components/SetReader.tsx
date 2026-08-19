@@ -11,15 +11,20 @@ import { Tracklist } from '@/components/Tracklist';
 import { parseRekordboxTxt } from '@/lib/parse/rekordbox';
 import type { ParseResult } from '@/lib/parse/types';
 import { computeVitals, type Vitals } from '@/lib/metrics/vitals';
+import type { BeatportScore } from '@/lib/beatport/match';
 
 type Analysis = { parsed: ParseResult; vitals: Vitals };
 
 export function SetReader({ canSave }: { canSave: boolean }) {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // undefined: not fetched yet. null: fetched, nothing to show (no chart data,
+  // or the request failed) — either way the reading just doesn't render.
+  const [beatport, setBeatport] = useState<BeatportScore | null | undefined>(undefined);
 
   async function handleFile(file: File) {
     setError(null);
+    setBeatport(undefined);
     try {
       const parsed = parseRekordboxTxt(await file.arrayBuffer());
       if (parsed.tracks.length === 0) {
@@ -34,6 +39,15 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         hasEnoughKeys: parsed.hasEnoughKeys,
         genre: dominantGenre(parsed.tracks),
       });
+
+      fetch('/api/beatport-score', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ tracks: parsed.tracks }),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((score: BeatportScore | null) => setBeatport(score))
+        .catch(() => setBeatport(null));
     } catch {
       setError('That file would not read. Export it again from rekordbox as a .txt.');
       setAnalysis(null);
@@ -67,6 +81,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
           <SetSummary
             vitals={analysis.vitals}
             meta={`${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`}
+            beatport={beatport}
           />
 
           {!analysis.parsed.hasEnoughKeys && (

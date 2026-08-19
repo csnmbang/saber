@@ -1,6 +1,7 @@
 import { HarmonicRings } from './HarmonicRings';
 import { RingLegend } from './RingLegend';
 import { VitalsPanel } from './VitalsPanel';
+import type { BeatportScore } from '@/lib/beatport/match';
 import { resolveArchetype, type ReadingKey } from '@/lib/metrics/archetype';
 import type { Vitals } from '@/lib/metrics/vitals';
 
@@ -22,7 +23,15 @@ export function readingValue(vitals: Vitals, key: ReadingKey): string {
  * after a drop and the page someone else opens from a link, so both always
  * show the same thing.
  */
-export function SetSummary({ vitals, meta }: { vitals: Vitals; meta?: string }) {
+export function SetSummary({
+  vitals,
+  meta,
+  beatport,
+}: {
+  vitals: Vitals;
+  meta?: string;
+  beatport?: BeatportScore | null;
+}) {
   const archetype = resolveArchetype(vitals);
 
   return (
@@ -48,7 +57,7 @@ export function SetSummary({ vitals, meta }: { vitals: Vitals; meta?: string }) 
         </div>
       </section>
 
-      <VitalsPanel vitals={vitals} />
+      <VitalsPanel vitals={vitals} beatport={beatport} />
     </>
   );
 }
