@@ -34,7 +34,7 @@ export function VitalsPanel({ vitals }: { vitals: Vitals }) {
         detail={
           vitals.harmonic === null
             ? 'No key data'
-            : `${t.locked} locked, ${t.smooth} smooth, out of ${t.classified}`
+            : `${t.locked} locked, ${t.smooth} smooth \u00b7 ${t.classified} transitions`
         }
       />
 
@@ -42,7 +42,7 @@ export function VitalsPanel({ vitals }: { vitals: Vitals }) {
         name="Risk"
         value={pct(vitals.risk)}
         detail={
-          vitals.risk === null ? 'No key data' : `${t.bold} bold, ${t.wide} wide, out of ${t.classified}`
+          vitals.risk === null ? 'No key data' : `${t.bold} bold, ${t.wide} wide \u00b7 ${t.classified} transitions`
         }
       />
 

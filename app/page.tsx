@@ -58,7 +58,7 @@ export default function Home() {
         >
           Saber
         </button>
-        <p className="text-muted mt-2">Drop your set history. See what you played.</p>
+        <p className="text-muted mt-2">Drop your track list. See what you played.</p>
       </header>
 
       {!analysis && (
