@@ -15,6 +15,7 @@
   --color-text: var(--text);
   --color-muted: var(--muted);
   --font-display: var(--font-anton), Impact, sans-serif;
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 }
 
@@ -22,12 +23,13 @@ html {
   color-scheme: dark;
 }
 
+/* Prose reads in the proportional face; only data wears the mono. */
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.55;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -39,13 +41,15 @@ body {
   line-height: 0.92;
 }
 
-/* Every number, label, and readout. */
+/* Every number and readout. */
 .readout {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
 
 .label {
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;

@@ -14,7 +14,7 @@ export function Tracklist({ tracks }: { tracks: ParsedTrack[] }) {
   return (
     <section>
       <h2 className="display text-2xl mb-2">Tracklist</h2>
-      <table className="w-full readout text-[13px]">
+      <table className="w-full text-[13px]">
         <thead>
           <tr className="label border-t border-line">
             <th className="text-left font-normal py-2 w-8">#</th>
@@ -26,13 +26,13 @@ export function Tracklist({ tracks }: { tracks: ParsedTrack[] }) {
         <tbody>
           {tracks.map((track) => (
             <tr key={track.position} className="border-t border-line align-top">
-              <td className="py-2 text-muted">{track.position}</td>
+              <td className="readout py-2 text-muted">{track.position}</td>
               <td className="py-2 pr-4">
                 {track.title}
                 {track.artist && <span className="text-muted"> · {track.artist}</span>}
               </td>
-              <td className="py-2 text-right">{track.bpm?.toFixed(0) ?? '—'}</td>
-              <td className="py-2 text-right">
+              <td className="readout py-2 text-right">{track.bpm?.toFixed(0) ?? '—'}</td>
+              <td className="readout py-2 text-right">
                 <KeyChip camelot={track.camelot} />
               </td>
             </tr>
