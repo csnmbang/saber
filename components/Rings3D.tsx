@@ -5,6 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { DoubleSide, type Group, type PointLight } from 'three';
 import { camelotColorThree, EMPTY_RING_THREE } from '@/lib/ui/colors';
+import { platterAngle, spinFor } from '@/lib/ui/spin';
 import type { Vitals } from '@/lib/metrics/vitals';
 
 const INNER_R = 0.95;
@@ -14,20 +15,6 @@ const MAX_TUBE = 0.135;
 const TWO_PI = Math.PI * 2;
 /** How far the stack leans away from the viewer. Enough to read as an object. */
 const TILT = -0.86;
-/**
- * The stack turns at the set's own tempo: one full revolution per 16-beat
- * phrase, which is how a DJ counts anyway. A 124 BPM set comes round every
- * 7.7 seconds.
- */
-const BEATS_PER_TURN = 16;
-/** Nothing to turn at when the export carried no tempo. */
-const NO_TEMPO_SPIN = 0.24;
-
-function spinFor(bpm: number | null | undefined): number {
-  if (!bpm) return NO_TEMPO_SPIN;
-  return ((bpm / 60) * TWO_PI) / BEATS_PER_TURN;
-}
-
 /**
  * The travelling highlight. It orbits close to the stack and burns hard, because
  * it is the only thing carrying the rotation: a closed ring turned about its own
@@ -46,7 +33,7 @@ const GLARE_HEIGHT = 3.2;
 function Glare({ spin }: { spin: number }) {
   const light = useRef<PointLight>(null);
   useFrame((state) => {
-    const t = state.clock.elapsedTime * spin;
+    const t = platterAngle(state.clock.elapsedTime, spin);
     light.current?.position.set(
       Math.cos(t) * GLARE_RADIUS,
       Math.sin(t) * GLARE_RADIUS,
@@ -140,8 +127,8 @@ function RingStack({ vitals }: { vitals: Vitals }) {
 
   // The outer group holds the lean; this one turns inside it, so the stack
   // spins in its own plane rather than orbiting the camera.
-  useFrame((_, delta) => {
-    if (platter.current) platter.current.rotation.z += delta * spin;
+  useFrame((state) => {
+    if (platter.current) platter.current.rotation.z = platterAngle(state.clock.elapsedTime, spin);
   });
 
   return (
