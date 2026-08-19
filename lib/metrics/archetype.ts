@@ -36,37 +36,37 @@ const ARCHETYPES: Record<ArchetypeId, Omit<Archetype, 'drivers'>> = {
   architect: {
     id: 'architect',
     name: 'The Architect',
-    blurb: 'Tightly keyed, few big jumps, tempo moving one direction all night.',
+    blurb: 'Tight keys, few big jumps, tempo pointed one way all night.',
   },
   gambler: {
     id: 'gambler',
     name: 'The Gambler',
-    blurb: 'Big key moves across a wide tempo spread — this set kept changing rooms.',
+    blurb: 'Big key moves across a wide tempo spread.',
   },
   sprinter: {
     id: 'sprinter',
     name: 'The Sprinter',
-    blurb: 'The fastest track landed in the first third and the set worked outward from there.',
+    blurb: 'Fastest track landed in the first third.',
   },
   marathon: {
     id: 'marathon',
     name: 'The Marathon',
-    blurb: 'Tempo climbed steadily and peaked in the last third.',
+    blurb: 'Tempo climbed all night and peaked in the last third.',
   },
   tightrope: {
     id: 'tightrope',
     name: 'The Tightrope',
-    blurb: 'Bold key moves that still landed in key — high wire, no falls.',
+    blurb: 'Bold key moves that still landed in key.',
   },
   wanderer: {
     id: 'wanderer',
     name: 'The Wanderer',
-    blurb: 'Wide spread of tempos and keys with no single direction of travel.',
+    blurb: 'Wide spread of tempos and keys, no single direction.',
   },
   anchor: {
     id: 'anchor',
     name: 'The Anchor',
-    blurb: 'Narrow tempo band, tightly keyed, holding one pocket the whole way.',
+    blurb: 'Narrow tempo band, tight keys, one pocket all night.',
   },
 };
 

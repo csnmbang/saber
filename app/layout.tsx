@@ -16,7 +16,7 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   title: 'Saber',
-  description: 'Drop your set history. See what you actually played.',
+  description: 'Drop your set history. See what you played.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

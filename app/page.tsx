@@ -34,14 +34,14 @@ export default function Home() {
     try {
       const parsed = parseRekordboxTxt(await file.arrayBuffer());
       if (parsed.tracks.length === 0) {
-        setError(parsed.warnings[0] ?? 'No tracks found in that file.');
+        setError(parsed.warnings[0] ?? 'No tracks in that file.');
         setAnalysis(null);
         return;
       }
       const vitals = computeVitals(parsed.tracks);
       setAnalysis({ parsed, vitals, archetype: resolveArchetype(vitals) });
     } catch {
-      setError('That file could not be read. Export it again from rekordbox as a .txt.');
+      setError('That file would not read. Export it again from rekordbox as a .txt.');
       setAnalysis(null);
     }
   }
@@ -49,11 +49,16 @@ export default function Home() {
   return (
     <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-16 flex flex-col gap-12">
       <header>
-        <h1 className="display text-6xl">Saber</h1>
-        <p className="text-muted mt-2 max-w-xl">
-          Drop your set history and see what you actually played — harmonic structure, tempo
-          shape, and the archetype your mixing falls into.
-        </p>
+        {/* The wordmark doubles as the way back to the drop zone. */}
+        <button
+          type="button"
+          onClick={() => setAnalysis(null)}
+          className="display text-6xl cursor-pointer"
+          aria-label={analysis ? 'Read another set' : 'Saber'}
+        >
+          Saber
+        </button>
+        <p className="text-muted mt-2">Drop your set history. See what you played.</p>
       </header>
 
       {!analysis && (
@@ -87,39 +92,22 @@ export default function Home() {
 
           {!analysis.parsed.hasEnoughKeys && (
             <section className="border border-line bg-surface p-5">
-              <p className="label">Key data is missing</p>
+              <p className="label">No key data</p>
               <p className="mt-2 text-[13px]">
-                Only {Math.round(analysis.parsed.keyCoverage * 100)}% of these tracks carry a key,
-                so the harmonic readings are left blank rather than guessed. The tempo and
-                structure half below is unaffected.
+                {Math.round(analysis.parsed.keyCoverage * 100)}% of these tracks have a key, so the
+                harmonic readings are blank rather than guessed. Tempo and structure below still
+                hold.
               </p>
               <p className="mt-2 text-[13px] text-muted">
-                To fix it for next time: select the tracks in rekordbox, right-click, and run
-                Analyze. Then export the playlist again.
+                Select the tracks in rekordbox, right-click, Analyze. Then export again.
               </p>
             </section>
           )}
 
           <VitalsPanel vitals={analysis.vitals} />
           <Tracklist tracks={analysis.parsed.tracks} />
-
-          <div>
-            <button
-              type="button"
-              onClick={() => setAnalysis(null)}
-              className="label border border-line px-4 py-2 hover:border-text hover:text-text"
-            >
-              Read another set
-            </button>
-          </div>
         </>
       )}
-
-      <footer className="mt-auto pt-10 text-[12px] text-muted">
-        Saber reads what you played. It does not score it.
-        <br />
-        Visuals adapted from the concepts in Kenichi Yoneda&apos;s Geom (CC BY-SA 4.0).
-      </footer>
     </main>
   );
 }

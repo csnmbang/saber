@@ -26,7 +26,7 @@ export function Rings2D({ vitals }: { vitals: Vitals }) {
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       className="w-full h-auto max-w-[480px]"
       role="img"
-      aria-label="Harmonic rings — one ring per Camelot key, thicker where more of the set was played"
+      aria-label="Harmonic rings: one ring per Camelot key, thicker where more of the set was played"
     >
       {Array.from({ length: 12 }, (_, i) => {
         const number = i + 1;

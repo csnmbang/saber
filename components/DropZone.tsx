@@ -23,9 +23,9 @@ export function DropZone({ onFile }: { onFile: (file: File) => void }) {
         over ? 'border-text bg-surface' : 'border-line'
       }`}
     >
-      <p className="text-base">Drop your rekordbox .txt export here</p>
+      <p className="text-base">Drop a rekordbox .txt export</p>
       <p className="text-muted mt-1 text-[13px]">
-        rekordbox: File &gt; Export a playlist to a file. Works on your History playlist too.
+        File &gt; Export a playlist to a file. History playlists work too.
       </p>
       <button
         type="button"
