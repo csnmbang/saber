@@ -4,44 +4,12 @@ import { dbConfigured, sql } from '@/lib/db';
 import { addGrant, decodeGrants, encodeGrants, SESSION_COOKIE } from '@/lib/session';
 import { computeVitals } from '@/lib/metrics/vitals';
 import { resolveArchetype } from '@/lib/metrics/archetype';
-import { toCamelot } from '@/lib/parse/key';
-import type { ParsedTrack, ParseSource } from '@/lib/parse/types';
+import { cleanIncomingTracks } from '@/lib/parse/sanitize';
+import type { ParseSource } from '@/lib/parse/types';
 
 const SOURCES: ParseSource[] = ['rekordbox', 'serato', 'traktor'];
-const MAX_TRACKS = 600;
 
 type Incoming = { source?: unknown; title?: unknown; tracks?: unknown };
-
-/**
- * Re-read the tracklist rather than trusting whatever the client says it found.
- * The readings are recomputed here from the tracks themselves, so a saved set
- * always agrees with the code that produced it.
- */
-function cleanTracks(raw: unknown): ParsedTrack[] | null {
-  if (!Array.isArray(raw) || raw.length === 0 || raw.length > MAX_TRACKS) return null;
-
-  const tracks: ParsedTrack[] = [];
-  for (const item of raw) {
-    if (typeof item?.title !== 'string' || !item.title.trim()) return null;
-    const bpm = typeof item.bpm === 'number' && Number.isFinite(item.bpm) ? item.bpm : null;
-    const durationS =
-      typeof item.durationS === 'number' && Number.isFinite(item.durationS)
-        ? Math.max(0, Math.trunc(item.durationS))
-        : null;
-    tracks.push({
-      position: tracks.length + 1,
-      title: item.title.slice(0, 300),
-      artist: typeof item.artist === 'string' ? item.artist.slice(0, 300) : null,
-      bpm: bpm !== null && bpm >= 20 && bpm <= 300 ? bpm : null,
-      camelot: typeof item.camelot === 'string' ? toCamelot(item.camelot) : null,
-      durationS,
-      // Saving doesn't store genre — nothing downstream of a save reads it.
-      // It only ever feeds the anonymous read-time KPI event, client-side.
-      genre: null,
-    });
-  }
-  return tracks;
-}
 
 export async function POST(request: Request) {
   if (!dbConfigured()) {
@@ -55,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Send a JSON body.' }, { status: 400 });
   }
 
-  const tracks = cleanTracks(body.tracks);
+  const tracks = cleanIncomingTracks(body.tracks);
   if (!tracks) {
     return NextResponse.json({ error: 'That tracklist could not be read.' }, { status: 400 });
   }
