@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
+import { TabBar } from '@/components/TabBar';
 import { Anton, Space_Grotesk, Space_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -28,8 +29,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={`${anton.variable} ${spaceGrotesk.variable} ${spaceMono.variable} h-full`}>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col tab-bar-offset">
         {children}
+        <TabBar />
         <Analytics />
       </body>
     </html>

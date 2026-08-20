@@ -34,6 +34,16 @@ html {
   color-scheme: dark;
 }
 
+/*
+ * Clears the fixed bottom nav. Computed rather than a flat guess, because the
+ * nav's own height grows on a notched phone (env(safe-area-inset-bottom) adds
+ * the home-indicator strip) — a fixed pb-16 would sit right under the bar on
+ * an iPhone and leave a gap everywhere else.
+ */
+.tab-bar-offset {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+}
+
 /* Prose reads in the proportional face; only data wears the mono. */
 body {
   background: var(--bg);
