@@ -132,6 +132,10 @@ export function decodeShare(code: string): Vitals | null {
       distinctKeys,
       keyTimeShare,
       keyTimeShareByKey,
+      // Deliberately not carried in a share link. The link promises the
+      // readings and the rings, and how someone tags their own library is
+      // neither — it is closer to the tracklist the link explicitly withholds.
+      genreShare: {},
       peakPosition: payload.c ? payload.c[1] / 100 : null,
       shape: payload.s && SHAPES.includes(payload.s) ? payload.s : null,
     },

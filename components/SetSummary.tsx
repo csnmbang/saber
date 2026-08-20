@@ -1,3 +1,4 @@
+import { GenreBreakdown } from './GenreBreakdown';
 import { HarmonicRings } from './HarmonicRings';
 import { RingLegend } from './RingLegend';
 import { VitalsPanel } from './VitalsPanel';
@@ -50,6 +51,7 @@ export function SetSummary({
             ))}
           </dl>
           {meta && <p className="label mt-8">{meta}</p>}
+          <GenreBreakdown vitals={vitals} />
         </div>
         <div>
           <HarmonicRings vitals={vitals} />

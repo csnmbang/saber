@@ -27,8 +27,11 @@ export function cleanIncomingTracks(raw: unknown): ParsedTrack[] | null {
       bpm: bpm !== null && bpm >= 20 && bpm <= 300 ? bpm : null,
       camelot: typeof item.camelot === 'string' ? toCamelot(item.camelot) : null,
       durationS,
-      // Server routes don't need genre — nothing downstream of them reads it.
-      genre: null,
+      // Kept, unlike most derived fields: computeVitals folds it into
+      // genreShare, which is stored with the set and read back on the saved
+      // page. Dropping it here would make genre vanish the moment a set is
+      // saved.
+      genre: typeof item.genre === 'string' ? item.genre.slice(0, 120) : null,
     });
   }
   return tracks;

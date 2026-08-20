@@ -40,6 +40,13 @@ export type Vitals = {
     keyTimeShare: Record<number, number>;
     /** The same share split by full key, e.g. '8A' — the A/B mix inside each ring. */
     keyTimeShareByKey: Record<string, number>;
+    /**
+     * Share of set time per genre, exactly as the export spelled it. Weighted
+     * by time played rather than track count, same as the key shares, so a
+     * long opener counts for more than a two-minute tool. Empty when the
+     * export carried no genre column — never guessed from anything else.
+     */
+    genreShare: Record<string, number>;
     /** Where the fastest track sat, 0 (first) to 1 (last). */
     peakPosition: number | null;
     shape: SetShape | null;
@@ -181,6 +188,20 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
     }
   }
 
+  // --- genre share -------------------------------------------------------
+  const genreShare: Record<string, number> = {};
+  let genreWeight = 0;
+  for (const t of tracks) {
+    const genre = t.genre?.trim();
+    if (!genre) continue;
+    const weight = t.durationS ?? 1;
+    genreShare[genre] = (genreShare[genre] ?? 0) + weight;
+    genreWeight += weight;
+  }
+  if (genreWeight > 0) {
+    for (const genre of Object.keys(genreShare)) genreShare[genre] /= genreWeight;
+  }
+
   return {
     trackCount: tracks.length,
     keyCoverage,
@@ -196,6 +217,7 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
       distinctKeys,
       keyTimeShare,
       keyTimeShareByKey,
+      genreShare,
       peakPosition,
       shape: shapeOf(bpm?.spread ?? 0, climb, peakPosition),
     },
