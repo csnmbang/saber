@@ -50,7 +50,7 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
           <button
             type="button"
             onClick={copyLink}
-            className="label border border-line px-4 py-2 hover:border-text hover:text-text"
+            className="btn-quiet"
           >
             {copied ? 'Link copied' : 'Copy link'}
           </button>
@@ -58,7 +58,7 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
             type="button"
             onClick={() => set(false)}
             disabled={pending}
-            className="label border border-line px-4 py-2 hover:border-text hover:text-text disabled:opacity-50"
+            className="btn-quiet"
           >
             {pending ? 'Unpublishing' : 'Unpublish'}
           </button>
@@ -79,7 +79,7 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
         type="button"
         onClick={() => set(true)}
         disabled={pending}
-        className="label mt-4 border border-line px-4 py-2 hover:border-text hover:text-text disabled:opacity-50"
+        className="btn mt-4"
       >
         {pending ? 'Publishing' : 'Publish set'}
       </button>

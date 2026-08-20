@@ -56,6 +56,58 @@ body {
   color: var(--muted);
 }
 
+/*
+ * Controls.
+ *
+ * Every action used to be the same outlined box, which reads as a form rather
+ * than an instrument and gives a page no hierarchy: nothing looks like the
+ * thing to press. Two tiers instead — one solid slab for the action that
+ * matters on a given screen, plain ruled text for everything alongside it.
+ *
+ * Hard edges, no radius, and tracking loosened only enough to keep uppercase
+ * mono readable. The wide tracking stays on .label, where it belongs.
+ */
+.btn,
+.btn-quiet {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-block;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.btn {
+  background: var(--text);
+  color: var(--bg);
+  padding: 12px 22px;
+}
+
+.btn:hover:not(:disabled) {
+  background: #fffaf0;
+}
+
+.btn:disabled,
+.btn-quiet:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* No box: a rule under the words, which lights up rather than boxing them in. */
+.btn-quiet {
+  color: var(--muted);
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.btn-quiet:hover:not(:disabled) {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

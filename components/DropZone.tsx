@@ -30,7 +30,7 @@ export function DropZone({ onFile }: { onFile: (file: File) => void }) {
       <button
         type="button"
         onClick={() => input.current?.click()}
-        className="label mt-6 border border-line px-4 py-2 hover:border-text hover:text-text"
+        className="btn mt-6"
       >
         Choose a file
       </button>

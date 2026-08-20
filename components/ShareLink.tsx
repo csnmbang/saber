@@ -30,7 +30,7 @@ export function ShareLink({ vitals }: { vitals: Vitals }) {
       <button
         type="button"
         onClick={copy}
-        className="label border border-line px-4 py-2 hover:border-text hover:text-text"
+        className="btn-quiet"
       >
         {copied ? 'Link copied' : 'Copy share link'}
       </button>

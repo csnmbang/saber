@@ -38,7 +38,7 @@ export default async function SharedSet({ params }: { params: Promise<{ code: st
           <div>
             <Link
               href="/"
-              className="label border border-line px-4 py-2 hover:border-text hover:text-text"
+              className="btn-quiet"
             >
               Read your own set
             </Link>
@@ -52,7 +52,7 @@ export default async function SharedSet({ params }: { params: Promise<{ code: st
           </p>
           <Link
             href="/"
-            className="label mt-6 inline-block border border-line px-4 py-2 hover:border-text hover:text-text"
+            className="btn mt-6"
           >
             Drop a track list
           </Link>

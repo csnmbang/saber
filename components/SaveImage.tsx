@@ -51,7 +51,7 @@ export function SaveImage({
         type="button"
         onClick={() => save('story')}
         disabled={pending !== null}
-        className="label border border-line px-4 py-2 hover:border-text hover:text-text disabled:opacity-50"
+        className="btn"
       >
         {pending === 'story' ? 'Rendering' : 'Save for Stories'}
       </button>
@@ -59,7 +59,7 @@ export function SaveImage({
         type="button"
         onClick={() => save('square')}
         disabled={pending !== null}
-        className="label border border-line px-4 py-2 hover:border-text hover:text-text disabled:opacity-50"
+        className="btn-quiet"
       >
         {pending === 'square' ? 'Rendering' : 'Save square'}
       </button>

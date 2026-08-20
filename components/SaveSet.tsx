@@ -39,7 +39,7 @@ export function SaveSet({ tracks, source }: { tracks: ParsedTrack[]; source: Par
         type="button"
         onClick={save}
         disabled={state === 'saving'}
-        className="label border border-line px-4 py-2 hover:border-text hover:text-text disabled:opacity-50"
+        className="btn-quiet"
       >
         {state === 'saving' ? 'Saving' : 'Save to my profile'}
       </button>

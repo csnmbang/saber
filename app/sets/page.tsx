@@ -57,7 +57,7 @@ export default async function YourSets() {
           <p>Nothing saved yet.</p>
           <Link
             href="/"
-            className="label mt-6 inline-block border border-line px-4 py-2 hover:border-text hover:text-text"
+            className="btn mt-6"
           >
             Drop a track list
           </Link>
