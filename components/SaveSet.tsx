@@ -43,7 +43,7 @@ export function SaveSet({ tracks, source }: { tracks: ParsedTrack[]; source: Par
       >
         {state === 'saving' ? 'Saving' : 'Save to my profile'}
       </button>
-      <p className="label mt-3">
+      <p className="text-[13px] text-muted mt-3">
         {state === 'failed'
           ? 'That did not save. Try again.'
           : 'Kept on this device. No signup.'}

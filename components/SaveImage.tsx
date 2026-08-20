@@ -51,7 +51,7 @@ export function SaveImage({
         type="button"
         onClick={() => save('story')}
         disabled={pending !== null}
-        className="btn"
+        className="btn-quiet"
       >
         {pending === 'story' ? 'Rendering' : 'Save for Stories'}
       </button>

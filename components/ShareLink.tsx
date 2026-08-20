@@ -34,7 +34,7 @@ export function ShareLink({ vitals }: { vitals: Vitals }) {
       >
         {copied ? 'Link copied' : 'Copy share link'}
       </button>
-      <p className="label mt-3">Shares the readings and the rings. Not your tracklist.</p>
+      <p className="text-[13px] text-muted mt-3">Shares the readings and the rings. Not your tracklist.</p>
     </div>
   );
 }
