@@ -2,7 +2,8 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { dbConfigured, sql } from '@/lib/db';
 import { decodeGrants, SESSION_COOKIE } from '@/lib/session';
-import { archetypeById, type ArchetypeId } from '@/lib/metrics/archetype';
+import { SetCard } from '@/components/SetCard';
+import type { Vitals } from '@/lib/metrics/vitals';
 
 type Row = {
   id: string;
@@ -11,6 +12,7 @@ type Row = {
   source: string;
   is_public: boolean;
   created_at: string;
+  vitals: Vitals;
 };
 
 /**
@@ -27,7 +29,7 @@ export default async function YourSets() {
   if (dbConfigured() && grants.length > 0) {
     const db = sql();
     rows = (await db`
-      select id, claim_token, archetype, source, is_public, created_at
+      select id, claim_token, archetype, source, is_public, created_at, vitals
       from sets where id = any(${grants.map((g) => g.setId)}::uuid[])
       order by created_at desc
     `) as Row[];
@@ -61,23 +63,16 @@ export default async function YourSets() {
           </Link>
         </section>
       ) : (
-        <ul>
+        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((row) => (
-            <li key={row.id} className="border-t border-line py-4">
-              <Link href={`/set/${row.id}`} className="flex items-baseline justify-between gap-4">
-                <span className="display text-2xl">
-                  {archetypeById(row.archetype as ArchetypeId)?.name ?? row.archetype}
-                </span>
-                <span className="label">
-                  {new Date(row.created_at).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                  {row.is_public ? ' · published' : ''}
-                </span>
-              </Link>
-            </li>
+            <SetCard
+              key={row.id}
+              id={row.id}
+              vitals={row.vitals}
+              archetype={row.archetype}
+              createdAt={row.created_at}
+              isPublic={row.is_public}
+            />
           ))}
         </ul>
       )}
