@@ -79,7 +79,7 @@ export function VitalsPanel({
         value={pct(vitals.range)}
         detail={
           c.bpm
-            ? `${c.bpm.p10.toFixed(0)} to ${c.bpm.p90.toFixed(0)} BPM, ${c.distinctKeys} keys`
+            ? `${c.bpm.p10.toFixed(0)} to ${c.bpm.p90.toFixed(0)} BPM as tagged, ${c.distinctKeys} keys`
             : 'No BPM data'
         }
       />

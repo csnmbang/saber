@@ -31,6 +31,18 @@ export type TempoPeak = {
  */
 export const MIN_PEAK_PROMINENCE = 3;
 
+/**
+ * How far up the set's own tempo range a summit has to sit to be called a peak,
+ * beyond the highest point itself.
+ *
+ * Prominence alone is not enough. A set that dips to its slowest and then lifts
+ * slightly to close has a final track that is locally higher with a real dip
+ * before it — prominent, but nowhere near the top of the night. Calling that a
+ * peak describes the set wrongly. A peak has to be high, not just higher than
+ * what surrounds it.
+ */
+export const MIN_PEAK_HEIGHT = 0.6;
+
 /** Indices of local maxima, treating a flat run as a single peak at its centre. */
 function localMaxima(values: number[]): number[] {
   const peaks: number[] = [];
@@ -63,15 +75,19 @@ function localMaxima(values: number[]): number[] {
 function prominenceAt(values: number[], index: number): number {
   const height = values[index];
 
+  // Scans stop at equal height, not just greater. Two tracks at the same top
+  // tempo a couple of tracks apart are one peak region, not two peaks: without
+  // this, each scan runs straight past its twin to a distant valley and both
+  // come back looking independently prominent.
   let leftValley: number | null = null;
   for (let i = index - 1; i >= 0; i--) {
-    if (values[i] > height) break;
+    if (values[i] >= height) break;
     leftValley = Math.min(leftValley ?? values[i], values[i]);
   }
 
   let rightValley: number | null = null;
   for (let i = index + 1; i < values.length; i++) {
-    if (values[i] > height) break;
+    if (values[i] >= height) break;
     rightValley = Math.min(rightValley ?? values[i], values[i]);
   }
 
@@ -97,6 +113,9 @@ export function findTempoPeaks(
   // A set that held one tempo the whole way has no peak, only a level.
   if (Math.max(...bpms) === Math.min(...bpms)) return [];
 
+  const low = Math.min(...bpms);
+  const heightFloor = low + (Math.max(...bpms) - low) * MIN_PEAK_HEIGHT;
+
   const candidates = localMaxima(bpms)
     .map((i) => ({
       position: positions[i],
@@ -111,7 +130,8 @@ export function findTempoPeaks(
   // The highest point of a set is its peak by definition, whatever the shape
   // around it. Every other summit has to earn the name with a real dip.
   const [highest, ...rest] = candidates;
-  return [highest, ...rest.filter((peak) => peak.prominence >= minProminence)].sort(
-    (a, b) => b.bpm - a.bpm || a.position - b.position,
-  );
+  return [
+    highest,
+    ...rest.filter((peak) => peak.prominence >= minProminence && peak.bpm >= heightFloor),
+  ].sort((a, b) => b.bpm - a.bpm || a.position - b.position);
 }

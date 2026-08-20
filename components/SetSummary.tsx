@@ -1,10 +1,12 @@
 import { GenreBreakdown } from './GenreBreakdown';
 import { HarmonicRings } from './HarmonicRings';
 import { RingLegend } from './RingLegend';
+import { TempoTrace } from './TempoTrace';
 import { VitalsPanel } from './VitalsPanel';
 import type { BeatportScore } from '@/lib/beatport/match';
 import { resolveArchetype, type ReadingKey } from '@/lib/metrics/archetype';
 import type { Vitals } from '@/lib/metrics/vitals';
+import type { ParsedTrack } from '@/lib/parse/types';
 
 const READING_LABEL: Record<ReadingKey, string> = {
   harmonic: 'Harmonic',
@@ -28,10 +30,18 @@ export function SetSummary({
   vitals,
   meta,
   beatport,
+  tracks,
 }: {
   vitals: Vitals;
   meta?: string;
   beatport?: BeatportScore | null;
+  /**
+   * Present on a set that was just read or one loaded from the database, and
+   * absent behind a share link, which carries the readings rather than the
+   * tracklist. The tempo trace needs per-track tempo, so it draws only where
+   * that is genuinely available.
+   */
+  tracks?: ParsedTrack[];
 }) {
   const archetype = resolveArchetype(vitals);
 
@@ -60,6 +70,8 @@ export function SetSummary({
       </section>
 
       <VitalsPanel vitals={vitals} beatport={beatport} />
+
+      {tracks && <TempoTrace tracks={tracks} peaks={vitals.components.peaks} />}
     </>
   );
 }

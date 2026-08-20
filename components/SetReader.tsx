@@ -82,6 +82,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
             vitals={analysis.vitals}
             meta={`${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`}
             beatport={beatport}
+            tracks={analysis.parsed.tracks}
           />
 
           {!analysis.parsed.hasEnoughKeys && (
