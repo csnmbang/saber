@@ -59,20 +59,25 @@ body {
 /*
  * Controls.
  *
- * Every action used to be the same outlined box, which reads as a form rather
- * than an instrument and gives a page no hierarchy: nothing looks like the
- * thing to press. Two tiers instead — one solid slab for the action that
- * matters on a given screen, plain ruled text for everything alongside it.
+ * Pills, sentence case, tight tracking — measured off CrowdVolt, the restraint
+ * reference the spec names. Worth recording why, because the previous version
+ * got it backwards: uppercase set in wide tracking is the combination that
+ * reads as generated, and neither CrowdVolt nor Resident Advisor uses it.
+ * CrowdVolt runs -0.35px on sentence case; RA runs normal tracking on mono.
+ * Wide tracking stays on .label, where it is doing a job.
  *
- * Hard edges, no radius, and tracking loosened only enough to keep uppercase
- * mono readable. The wide tracking stays on .label, where it belongs.
+ * Two tiers, so a screen has one obvious action: cream fill for that, and a
+ * 4% white wash with a hairline for everything beside it. The wash is what
+ * makes a secondary control still read as pressable without competing.
  */
 .btn,
 .btn-quiet {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: 9999px;
+  padding: 10px 20px;
   display: inline-block;
   transition:
     background-color 120ms ease,
@@ -83,29 +88,29 @@ body {
 .btn {
   background: var(--text);
   color: var(--bg);
-  padding: 12px 22px;
+  border: 1px solid transparent;
 }
 
 .btn:hover:not(:disabled) {
   background: #fffaf0;
 }
 
+.btn-quiet {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(237, 231, 219, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-quiet:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--text);
+}
+
 .btn:disabled,
 .btn-quiet:disabled {
   opacity: 0.4;
   cursor: default;
-}
-
-/* No box: a rule under the words, which lights up rather than boxing them in. */
-.btn-quiet {
-  color: var(--muted);
-  padding: 12px 2px;
-  border-bottom: 1px solid var(--line);
-}
-
-.btn-quiet:hover:not(:disabled) {
-  color: var(--text);
-  border-bottom-color: var(--text);
 }
 
 @media (prefers-reduced-motion: reduce) {
