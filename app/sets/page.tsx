@@ -14,7 +14,8 @@ type Row = {
 };
 
 /**
- * Your sets, from the cookie that holds them. No account, because none is
+ * A profile without an account: the sets this browser has saved, from the
+ * signed cookie that holds them. No login, because none is
  * needed: the browser already proves which sets are yours. The cost is that
  * this list is per-device, which is exactly what accounts would later fix.
  */
@@ -42,7 +43,11 @@ export default async function YourSets() {
         <Link href="/" className="display text-6xl inline-block">
           Saber
         </Link>
-        <p className="text-muted mt-2">Your sets, on this device.</p>
+        <p className="text-muted mt-2">
+          {rows.length === 0
+            ? 'My profile'
+            : `My profile · ${rows.length} ${rows.length === 1 ? 'set' : 'sets'}`}
+        </p>
       </header>
 
       {rows.length === 0 ? (

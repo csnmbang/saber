@@ -41,12 +41,12 @@ export function SaveSet({ tracks, source }: { tracks: ParsedTrack[]; source: Par
         disabled={state === 'saving'}
         className="label border border-line px-4 py-2 hover:border-text hover:text-text disabled:opacity-50"
       >
-        {state === 'saving' ? 'Saving' : 'Save this set'}
+        {state === 'saving' ? 'Saving' : 'Save to my profile'}
       </button>
       <p className="label mt-3">
         {state === 'failed'
           ? 'That did not save. Try again.'
-          : 'Keeps it at a link only you can open, until you publish it.'}
+          : 'Kept on this device. No signup.'}
       </p>
     </div>
   );

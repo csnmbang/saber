@@ -102,7 +102,7 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
           href="/sets"
           className="label border border-line px-4 py-2 hover:border-text hover:text-text"
         >
-          Your sets
+          My profile
         </Link>
       </div>
     </main>

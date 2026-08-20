@@ -72,9 +72,8 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
     <section className="border border-line bg-surface p-5">
       <p className="label">Only you can open this</p>
       <p className="mt-2 text-[13px]">
-        Publishing puts this page at a link anyone can open. That means the archetype, the four
-        readings, the rings, and every track title and artist below. Unpublishing takes it back
-        immediately.
+        Publishing puts this at a link anyone can open: the readings, the rings, and every track
+        below. Unpublish anytime.
       </p>
       <button
         type="button"
