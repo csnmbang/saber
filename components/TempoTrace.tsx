@@ -117,10 +117,6 @@ export function TempoTrace({ tracks, peaks }: { tracks: ParsedTrack[]; peaks: Te
           {`${minBpm.toFixed(0)}–${maxBpm.toFixed(0)} BPM AS TAGGED`}
         </text>
       </svg>
-      <p className="text-[13px] text-muted mt-1">
-        The tempo your library has for each record. Where you actually set the pitch is not in the
-        export, so this is the material you reached for, not the tempo you played it at.
-      </p>
     </section>
   );
 }
