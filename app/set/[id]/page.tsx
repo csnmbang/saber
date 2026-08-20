@@ -91,7 +91,7 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
         tracks={tracks}
         beatport={beatport}
       />
-      <SaveImage vitals={set.vitals} meta={`${tracks.length} tracks · ${played}`} />
+      <SaveImage vitals={set.vitals} meta={`${tracks.length} tracks · ${played}`} tracks={tracks} />
 
       {tracks.length > 0 && <Tracklist tracks={tracks} />}
 

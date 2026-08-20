@@ -70,3 +70,34 @@ export function buildTempoTrace(tracks: ParsedTrack[]): TempoTrace | null {
 
   return { points, minBpm, maxBpm };
 }
+
+export type Point = { x: number; y: number };
+
+export type CurveSegment = { from: Point; c1: Point; c2: Point; to: Point };
+
+/**
+ * Catmull-Rom through the given points, expressed as cubic Beziers.
+ *
+ * Each segment takes its tangent from its neighbours, so consecutive segments
+ * meet smoothly and the whole thing reads as one curve even when drawn a piece
+ * at a time — which it has to be, because each piece is colored by its own key.
+ *
+ * Shared by the SVG on the page and the canvas in the export so a curve is the
+ * same shape wherever it is drawn.
+ */
+export function curveSegments(points: Point[]): CurveSegment[] {
+  const segments: CurveSegment[] = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] ?? points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] ?? p2;
+    segments.push({
+      from: p1,
+      c1: { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 },
+      c2: { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 },
+      to: p2,
+    });
+  }
+  return segments;
+}

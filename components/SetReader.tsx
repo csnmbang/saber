@@ -105,6 +105,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
             meta={`${analysis.parsed.tracks.length} tracks${
               analysis.vitals.components.bpm ? ` · ${analysis.vitals.components.bpm.mean.toFixed(0)} bpm` : ''
             }`}
+            tracks={analysis.parsed.tracks}
           />
           <div className="flex flex-wrap gap-10">
             <ShareLink vitals={analysis.vitals} />

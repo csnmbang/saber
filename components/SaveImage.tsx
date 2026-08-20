@@ -5,6 +5,7 @@ import { trackSaveImage } from '@/lib/analytics';
 import { renderShareImage, type ShareImageFormat } from '@/lib/ui/shareImage';
 import { resolveArchetype } from '@/lib/metrics/archetype';
 import type { Vitals } from '@/lib/metrics/vitals';
+import type { ParsedTrack } from '@/lib/parse/types';
 
 function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -21,13 +22,22 @@ function download(blob: Blob, filename: string) {
  * Rendered client-side from the same rings and readings already on screen, so
  * this needs nothing from the server and works on a set that was never saved.
  */
-export function SaveImage({ vitals, meta }: { vitals: Vitals; meta?: string }) {
+export function SaveImage({
+  vitals,
+  meta,
+  tracks,
+}: {
+  vitals: Vitals;
+  meta?: string;
+  /** Absent behind a share link, which carries readings rather than the tracklist. */
+  tracks?: ParsedTrack[];
+}) {
   const [pending, setPending] = useState<ShareImageFormat | null>(null);
 
   async function save(format: ShareImageFormat) {
     setPending(format);
     try {
-      const blob = await renderShareImage(vitals, format, meta);
+      const blob = await renderShareImage(vitals, format, meta, tracks);
       trackSaveImage({ format });
       download(blob, `saber-${resolveArchetype(vitals).id}-${format}.png`);
     } finally {

@@ -1,4 +1,8 @@
 import { ringsDataUri } from './ringsSvg';
+import { buildTempoTrace, curveSegments } from './tempoTrace';
+import { camelotColor } from './colors';
+import { parseCamelot } from '../parse/key';
+import type { ParsedTrack } from '../parse/types';
 import { resolveArchetype, type ReadingKey } from '../metrics/archetype';
 import type { Vitals } from '../metrics/vitals';
 
@@ -117,6 +121,55 @@ export function layoutShareImage(
   };
 }
 
+/**
+ * How faint the tempo curve sits behind the rings, and how much of the rings'
+ * height it is allowed to sweep through.
+ */
+const CURVE_ALPHA = 0.3;
+const CURVE_BAND = 0.5;
+const CURVE_WIDTH: Record<ShareImageFormat, number> = { story: 9, square: 7 };
+
+/**
+ * The tempo curve as a horizon behind the rings: full bleed edge to edge,
+ * dimmed, sweeping through the middle of the rings' band.
+ *
+ * It carries the same reading as the curve on the page and the same colors,
+ * but as ground rather than figure — the rings stay the subject, and the shape
+ * of the night sits behind them instead of taking a block of its own.
+ */
+function drawTempoHorizon(
+  ctx: CanvasRenderingContext2D,
+  tracks: ParsedTrack[],
+  format: ShareImageFormat,
+  layout: { W: number; ringsY: number; ringsSize: number },
+) {
+  const trace = buildTempoTrace(tracks);
+  if (!trace) return;
+
+  const bandHeight = layout.ringsSize * CURVE_BAND;
+  const bandTop = layout.ringsY + (layout.ringsSize - bandHeight) / 2;
+  // Bleeds past both edges so it reads as a horizon rather than a chart.
+  const overscan = layout.W * 0.06;
+  const pixels = trace.points.map((p) => ({
+    x: -overscan + p.x * (layout.W + overscan * 2),
+    y: bandTop + (1 - p.y) * bandHeight,
+  }));
+
+  ctx.save();
+  ctx.globalAlpha = CURVE_ALPHA;
+  ctx.lineWidth = CURVE_WIDTH[format];
+  ctx.lineCap = 'round';
+  curveSegments(pixels).forEach((seg, i) => {
+    const parsed = parseCamelot(trace.points[i].camelot);
+    ctx.strokeStyle = parsed ? camelotColor(parsed.number, parsed.letter) : '#EDE7DB';
+    ctx.beginPath();
+    ctx.moveTo(seg.from.x, seg.from.y);
+    ctx.bezierCurveTo(seg.c1.x, seg.c1.y, seg.c2.x, seg.c2.y, seg.to.x, seg.to.y);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
 function cssFont(varName: string): string {
   const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
   return value || 'sans-serif';
@@ -141,6 +194,7 @@ export async function renderShareImage(
   vitals: Vitals,
   format: ShareImageFormat,
   meta?: string,
+  tracks?: ParsedTrack[],
 ): Promise<Blob> {
   if (typeof document === 'undefined') throw new Error('renderShareImage needs a browser.');
   await document.fonts.ready;
@@ -172,6 +226,9 @@ export async function renderShareImage(
   ctx.fillStyle = MUTED;
   ctx.font = `400 ${BLURB_SIZE[format]}px ${fonts.mono}`;
   layout.blurbLines.forEach((line, i) => ctx.fillText(line, pad, layout.blurbBaselines[i]));
+
+  // Behind the rings, so the rings read on top of it.
+  if (tracks) drawTempoHorizon(ctx, tracks, format, layout);
 
   const ringsImg = await loadImage(ringsDataUri(vitals));
   ctx.drawImage(ringsImg, layout.ringsX, layout.ringsY, layout.ringsSize, layout.ringsSize);

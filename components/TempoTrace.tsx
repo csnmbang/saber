@@ -1,6 +1,6 @@
 import { camelotColor } from '@/lib/ui/colors';
 import { parseCamelot } from '@/lib/parse/key';
-import { buildTempoTrace, type TracePoint } from '@/lib/ui/tempoTrace';
+import { buildTempoTrace, curveSegments, type TracePoint } from '@/lib/ui/tempoTrace';
 import type { TempoPeak } from '@/lib/metrics/peaks';
 import type { ParsedTrack } from '@/lib/parse/types';
 
@@ -23,26 +23,6 @@ function segmentColor(camelot: string | null): string {
 }
 
 type Pixel = { x: number; y: number };
-
-/**
- * Catmull-Rom control points, expressed as a cubic Bezier. Each segment's
- * tangent comes from its neighbours, so consecutive segments meet smoothly and
- * the whole line reads as one curve even though it is drawn a piece at a time —
- * which it has to be, because each piece takes the color of its own key.
- */
-function curveTo(points: Pixel[], i: number): string {
-  const p0 = points[i - 1] ?? points[i];
-  const p1 = points[i];
-  const p2 = points[i + 1];
-  const p3 = points[i + 2] ?? p2;
-
-  const c1x = p1.x + (p2.x - p0.x) / 6;
-  const c1y = p1.y + (p2.y - p0.y) / 6;
-  const c2x = p2.x - (p3.x - p1.x) / 6;
-  const c2y = p2.y - (p3.y - p1.y) / 6;
-
-  return `M ${p1.x} ${p1.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
-}
 
 /**
  * The tempo of the records across a set, curving between them and shifting hue
@@ -76,10 +56,10 @@ export function TempoTrace({ tracks, peaks }: { tracks: ParsedTrack[]; peaks: Te
         role="img"
         aria-label={`Tempo across the set, ${minBpm.toFixed(0)} to ${maxBpm.toFixed(0)} BPM`}
       >
-        {pixels.slice(0, -1).map((_, i) => (
+        {curveSegments(pixels).map((seg, i) => (
           <path
             key={points[i].position}
-            d={curveTo(pixels, i)}
+            d={`M ${seg.from.x} ${seg.from.y} C ${seg.c1.x} ${seg.c1.y}, ${seg.c2.x} ${seg.c2.y}, ${seg.to.x} ${seg.to.y}`}
             fill="none"
             stroke={segmentColor(points[i].camelot)}
             strokeWidth={STROKE}
