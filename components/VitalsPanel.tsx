@@ -5,6 +5,20 @@ function pct(v: number | null): string {
   return v === null ? '—' : `${Math.round(v * 100)}%`;
 }
 
+/**
+ * Where the set peaked. Every summit gets named, in the order they were
+ * played, because "two peaks" is a truer description of a long night than
+ * whichever one happened to be a fraction of a BPM higher.
+ */
+function peakDetail(peaks: Vitals['components']['peaks'], fallback: number): string {
+  if (peaks.length === 0) return `peak at ${Math.round(fallback * 100)}%`;
+
+  const inPlayOrder = [...peaks].sort((a, b) => a.position - b.position);
+  const at = inPlayOrder.map((p) => `${Math.round(p.at * 100)}%`).join(' and ');
+  if (peaks.length === 1) return `peak at ${at}`;
+  return `${peaks.length === 2 ? 'two' : peaks.length} peaks, at ${at}`;
+}
+
 function Reading({ name, value, detail }: { name: string; value: string; detail: string }) {
   return (
     <div className="border-t border-line py-4">
@@ -73,11 +87,7 @@ export function VitalsPanel({
       <Reading
         name="Climb"
         value={vitals.climb === null ? '—' : vitals.climb.toFixed(2)}
-        detail={
-          c.peakPosition === null
-            ? 'No BPM data'
-            : `${c.shape}, peak at ${Math.round(c.peakPosition * 100)}%`
-        }
+        detail={c.peakPosition === null ? 'No BPM data' : `${c.shape}, ${peakDetail(c.peaks, c.peakPosition)}`}
       />
 
       {beatport && beatport.pct !== null && (

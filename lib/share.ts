@@ -137,6 +137,9 @@ export function decodeShare(code: string): Vitals | null {
       // neither — it is closer to the tracklist the link explicitly withholds.
       genreShare: {},
       peakPosition: payload.c ? payload.c[1] / 100 : null,
+      // A share link carries one peak position, not the full list — see the
+      // note on genreShare above about what a link is and isn't for.
+      peaks: [],
       shape: payload.s && SHAPES.includes(payload.s) ? payload.s : null,
     },
   };

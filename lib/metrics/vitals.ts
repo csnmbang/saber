@@ -1,6 +1,7 @@
 import { parseCamelot } from '../parse/key';
 import { MIN_KEY_COVERAGE, type ParsedTrack } from '../parse/types';
 import { transitionsOf, type TransitionKind } from './transitions';
+import { findTempoPeaks, type TempoPeak } from './peaks';
 import {
   CLIMB_FLAT,
   CLIMB_STEADY,
@@ -49,6 +50,13 @@ export type Vitals = {
     genreShare: Record<string, number>;
     /** Where the fastest track sat, 0 (first) to 1 (last). */
     peakPosition: number | null;
+    /**
+     * Every summit in the set's tempo, highest first — not just the global
+     * maximum. A night that rises, drops the room, and rises again has two,
+     * and which of them happens to be a tenth of a BPM higher is not
+     * interesting enough to be the only one reported.
+     */
+    peaks: TempoPeak[];
     shape: SetShape | null;
   };
 };
@@ -100,9 +108,19 @@ export function spearman(a: number[], b: number[]): number | null {
   return pearson(ranks(a), ranks(b));
 }
 
-function shapeOf(spread: number, rho: number | null, peak: number | null): SetShape | null {
+function shapeOf(
+  spread: number,
+  rho: number | null,
+  peak: number | null,
+  peakCount: number,
+): SetShape | null {
   if (rho === null && peak === null) return null;
   if (spread < 4) return 'plateau';
+  // Checked before anything about where the highest point sat: a set with two
+  // summits is a wave whichever one happens to be higher. Without this, a
+  // two-peak night whose taller summit came early was called front-loaded,
+  // which describes a completely different set.
+  if (peakCount > 1) return 'wave';
   if (rho !== null && rho >= CLIMB_STEADY) return 'steady climb';
   if (peak !== null && peak <= PEAK_EARLY) return 'front-loaded';
   if (rho !== null && Math.abs(rho) < CLIMB_FLAT) return 'plateau';
@@ -160,6 +178,11 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
     const peak = withBpm.reduce((best, t) => (t.bpm > best.bpm ? t : best), withBpm[0]);
     peakPosition = (peak.position - 1) / (tracks.length - 1);
   }
+  const peaks = findTempoPeaks(
+    withBpm.map((t) => t.position),
+    withBpm.map((t) => t.bpm),
+    tracks.length,
+  );
 
   // --- ring weights --------------------------------------------------------
   const keyTimeShare: Record<number, number> = {};
@@ -219,7 +242,8 @@ export function computeVitals(tracks: ParsedTrack[]): Vitals {
       keyTimeShareByKey,
       genreShare,
       peakPosition,
-      shape: shapeOf(bpm?.spread ?? 0, climb, peakPosition),
+      peaks,
+      shape: shapeOf(bpm?.spread ?? 0, climb, peakPosition, peaks.length),
     },
   };
 }

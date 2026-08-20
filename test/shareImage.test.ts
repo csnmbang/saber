@@ -27,6 +27,7 @@ function vitalsFor(id: ArchetypeId): Vitals {
       distinctKeys: 6,
       keyTimeShare: {},
       genreShare: {},
+    peaks: [],
     keyTimeShareByKey: {},
       keySegments: [],
       peakPosition: 0.4,
