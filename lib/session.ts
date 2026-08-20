@@ -63,3 +63,34 @@ export function addGrant(existing: SetGrant[], grant: SetGrant, limit = 40): Set
 export function holdsGrant(grants: SetGrant[], setId: string, claimToken: string): boolean {
   return grants.some((g) => g.setId === setId && g.claimToken === claimToken);
 }
+
+/**
+ * A random id kept in a signed cookie, identifying a browser and nothing else.
+ *
+ * It exists to answer one question — how many different people have dropped a
+ * set — and is deliberately incapable of answering any other. It carries no
+ * account, no email, no address: a fresh random value on first use, and the
+ * signature only stops someone hand-editing one browser's id into another's.
+ *
+ * Worth being precise about what it counts: distinct browsers, not distinct
+ * people. The same person on a phone and a laptop is two, a cleared cookie
+ * starts over, and a shared machine is one. It is a floor on real usage, not
+ * a headcount.
+ */
+export const READER_COOKIE = 'saber_reader';
+
+export function encodeReaderId(id: string): string {
+  return `${id}.${sign(id)}`;
+}
+
+export function decodeReaderId(cookie: string | undefined | null): string | null {
+  if (!cookie) return null;
+  const dot = cookie.lastIndexOf('.');
+  if (dot <= 0) return null;
+
+  const id = cookie.slice(0, dot);
+  const provided = Buffer.from(cookie.slice(dot + 1));
+  const expected = Buffer.from(sign(id));
+  if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) return null;
+  return /^[0-9a-f-]{36}$/i.test(id) ? id : null;
+}

@@ -40,6 +40,18 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         genre: dominantGenre(parsed.tracks),
       });
 
+      // Fire and forget: this is a counter, and nothing on the page waits on it.
+      fetch('/api/read', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          source: parsed.source,
+          trackCount: parsed.tracks.length,
+          hasEnoughKeys: parsed.hasEnoughKeys,
+        }),
+        keepalive: true,
+      }).catch(() => {});
+
       fetch('/api/beatport-score', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
