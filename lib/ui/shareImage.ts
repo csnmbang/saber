@@ -121,33 +121,31 @@ export function layoutShareImage(
   };
 }
 
-/**
- * How faint the tempo curve sits behind the rings, and how much of the rings'
- * height it is allowed to sweep through.
- */
+/** How faint the tempo curve sits behind the readings. */
 const CURVE_ALPHA = 0.3;
-const CURVE_BAND = 0.5;
 const CURVE_WIDTH: Record<ShareImageFormat, number> = { story: 9, square: 7 };
+/** Room left above the labels and below the footer so the curve is not clipped tight to either. */
+const CURVE_HEADROOM = 74;
 
 /**
- * The tempo curve as a horizon behind the rings: full bleed edge to edge,
- * dimmed, sweeping through the middle of the rings' band.
+ * The tempo curve as a horizon across the readings at the foot of the card:
+ * full bleed edge to edge, dimmed, sweeping the band the numbers sit in.
  *
  * It carries the same reading as the curve on the page and the same colors,
- * but as ground rather than figure — the rings stay the subject, and the shape
- * of the night sits behind them instead of taking a block of its own.
+ * but as ground rather than figure. Down here it fills space that was empty
+ * anyway rather than competing with the rings, which stay the subject.
  */
 function drawTempoHorizon(
   ctx: CanvasRenderingContext2D,
   tracks: ParsedTrack[],
   format: ShareImageFormat,
-  layout: { W: number; ringsY: number; ringsSize: number },
+  layout: { W: number; statsY: number; footerY: number },
 ) {
   const trace = buildTempoTrace(tracks);
   if (!trace) return;
 
-  const bandHeight = layout.ringsSize * CURVE_BAND;
-  const bandTop = layout.ringsY + (layout.ringsSize - bandHeight) / 2;
+  const bandTop = layout.statsY - CURVE_HEADROOM;
+  const bandHeight = Math.max(60, layout.footerY - CURVE_HEADROOM / 2 - bandTop);
   // Bleeds past both edges so it reads as a horizon rather than a chart.
   const overscan = layout.W * 0.06;
   const pixels = trace.points.map((p) => ({
@@ -227,11 +225,12 @@ export async function renderShareImage(
   ctx.font = `400 ${BLURB_SIZE[format]}px ${fonts.mono}`;
   layout.blurbLines.forEach((line, i) => ctx.fillText(line, pad, layout.blurbBaselines[i]));
 
-  // Behind the rings, so the rings read on top of it.
-  if (tracks) drawTempoHorizon(ctx, tracks, format, layout);
-
   const ringsImg = await loadImage(ringsDataUri(vitals));
   ctx.drawImage(ringsImg, layout.ringsX, layout.ringsY, layout.ringsSize, layout.ringsSize);
+
+  // Under the readings at the foot of the card, drawn before them so the
+  // numbers stay legible on top.
+  if (tracks) drawTempoHorizon(ctx, tracks, format, layout);
 
   archetype.drivers.forEach((key, i) => {
     const x = layout.statX + i * layout.statColumnGap;
