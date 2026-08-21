@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { dbConfigured, sql } from '@/lib/db';
 import { decodeGrants, SESSION_COOKIE } from '@/lib/session';
 import { SetCard } from '@/components/SetCard';
+import { Signature } from '@/components/Signature';
+import { buildSignature } from '@/lib/metrics/signature';
 import type { Vitals } from '@/lib/metrics/vitals';
 
 type Row = {
@@ -39,6 +41,8 @@ export default async function YourSets() {
     rows = rows.filter((row) => tokens.get(row.id) === row.claim_token);
   }
 
+  const signature = buildSignature(rows.map((row) => row.vitals));
+
   return (
     <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-16 flex flex-col gap-12">
       <header>
@@ -63,18 +67,21 @@ export default async function YourSets() {
           </Link>
         </section>
       ) : (
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => (
-            <SetCard
-              key={row.id}
-              id={row.id}
-              vitals={row.vitals}
-              archetype={row.archetype}
-              createdAt={row.created_at}
-              isPublic={row.is_public}
-            />
-          ))}
-        </ul>
+        <>
+          {signature && <Signature vitals={signature} setCount={rows.length} />}
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {rows.map((row) => (
+              <SetCard
+                key={row.id}
+                id={row.id}
+                vitals={row.vitals}
+                archetype={row.archetype}
+                createdAt={row.created_at}
+                isPublic={row.is_public}
+              />
+            ))}
+          </ul>
+        </>
       )}
     </main>
   );
