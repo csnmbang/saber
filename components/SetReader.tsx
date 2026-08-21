@@ -35,6 +35,20 @@ type Example = {
 
 const EXAMPLES: Example[] = [
   {
+    id: 'purple-disco-tales-2026-08',
+    file: '/demo/purple-disco-tales-2026-08.txt',
+    artist: 'Purple Disco Machine',
+    name: 'Purple Disco Tales August',
+    playedAt: '2026-08-20',
+  },
+  {
+    id: 'global-dance-hq-2026-08-14',
+    file: '/demo/global-dance-hq-2026-08-14.txt',
+    artist: 'Pete Tong, Michael Bibi, Tini Gessler',
+    name: 'Global Dance HQ',
+    playedAt: '2026-08-14',
+  },
+  {
     id: 'asot-ibiza-2026',
     file: '/demo/asot-ibiza-2026.txt',
     artist: 'Armin van Buuren',
@@ -146,8 +160,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
               ))}
             </ul>
             <p className="text-[13px] text-muted mt-3">
-              Published tracklists. Tempo and key for each track come from Beatport, so none of
-              this came out of rekordbox.
+              Published tracklists. Tempo and key for each track come from Beatport.
             </p>
           </section>
         </>

@@ -8,11 +8,13 @@ the real column order, real accented characters in artist names.
 exercise one thing each: Open Key notation, non-English column headers, and an
 export too sparse to report harmonic readings.
 
-**asot-demo.txt — assembled, not exported.** Read this before using it for
-anything but tests.
+**asot-demo.txt, and the three files in public/demo — assembled, not exported.**
+Read this before using them for anything but tests.
 
-The track order and titles are the published tracklist of an *A State of Trance*
-compilation mixed by Armin van Buuren, transcribed from screenshots. The BPM,
+The track order and titles come from published tracklists, transcribed from
+screenshots: an *A State of Trance* compilation mixed by Armin van Buuren,
+Purple Disco Machine's *Purple Disco Tales*, and a *Global Dance HQ* show with
+Pete Tong, Michael Bibi and Tini Gessler. The BPM,
 key, length and genre on each row were looked up on Beatport and matched by
 title *and* artist *and* remix name — the remix mattered: matching "Fiji" on
 title alone returned the Yeadon mix at 123bpm F Minor when the tracklist calls
@@ -20,12 +22,13 @@ for the Oliver Smith mix at 130bpm F Major.
 
 What that means for anyone reading numbers off it:
 
-- **Thirteen of the forty-three are `ID - ID`.** Those are ASOT exclusives and
-  unreleased material that simply are not on Beatport. They keep their place in
+- **Unmatched tracks are `ID - ID`.** Thirteen of forty-three in the ASOT set,
+  five of fourteen in Purple Disco Tales, eight of thirty in Global Dance HQ.
+  Those are exclusives, edits and unreleased material that are not on Beatport. They keep their place in
   the running order but carry no title, artist, tempo or key — `ID` is what a DJ
   writes for a track nobody has identified, which says unknown out loud instead
-  of leaving rows that read as a rendering fault. The file sits at 70% key
-  coverage as a result.
+  of leaving rows that read as a rendering fault. Key coverage lands at 70%,
+  64% and 73%, all above the 60% floor for reporting harmonic readings.
 - **The tempo is the released tempo, not the played tempo.** Nobody's pitch
   fader is in this data.
 - **One row is corrected, deliberately.** Beatport tags "SPECIAL TOUCH" at 74
