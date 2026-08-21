@@ -216,8 +216,15 @@ export function SetReader({ canSave }: { canSave: boolean }) {
           />
           <div className="flex flex-wrap gap-10">
             <ShareLink vitals={analysis.vitals} />
-            {canSave && <SaveSet tracks={analysis.parsed.tracks} source={analysis.parsed.source} />}
+            {canSave && !analysis.example && (
+              <SaveSet tracks={analysis.parsed.tracks} source={analysis.parsed.source} />
+            )}
           </div>
+          {analysis.example && (
+            <p className="text-[13px] text-muted">
+              Examples aren&apos;t saved to a profile. Drop your own track list to save one.
+            </p>
+          )}
         </>
       )}
     </main>
