@@ -149,12 +149,17 @@ export function SetReader({ canSave }: { canSave: boolean }) {
                   <button
                     type="button"
                     onClick={() => loadExample(example)}
-                    className="w-full flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3 text-left text-muted hover:text-text transition-colors"
+                    className="group w-full py-3 text-left"
                   >
-                    <span>
-                      {example.artist}, {example.name}
+                    <span className="flex flex-wrap items-baseline justify-between gap-x-6">
+                      {/* Whose set it is carries the line. A three-name credit
+                          run into the set title reads as a fourth artist. */}
+                      <span className="text-muted group-hover:text-text transition-colors">
+                        {example.artist}
+                      </span>
+                      <span className="label shrink-0">{formatPlayed(example.playedAt)}</span>
                     </span>
-                    <span className="label shrink-0">{formatPlayed(example.playedAt)}</span>
+                    <span className="block text-[13px] text-muted/70 mt-0.5">{example.name}</span>
                   </button>
                 </li>
               ))}
@@ -171,9 +176,8 @@ export function SetReader({ canSave }: { canSave: boolean }) {
           {analysis.example && (
             <div className="-mb-6">
               <p className="label">Example</p>
-              <p className="mt-1">
-                {analysis.example.artist}, {analysis.example.name}
-              </p>
+              <p className="mt-1">{analysis.example.artist}</p>
+              <p className="text-[13px] text-muted">{analysis.example.name}</p>
             </div>
           )}
 
