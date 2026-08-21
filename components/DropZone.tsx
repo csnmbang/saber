@@ -24,9 +24,11 @@ export function DropZone({ onFile }: { onFile: (file: File) => void }) {
       }`}
     >
       <p className="text-base">Drop a rekordbox .txt export</p>
-      <p className="text-muted mt-1 text-[13px]">
-        File &gt; Export a playlist to a file. History playlists work too.
-      </p>
+      <ol className="text-muted mt-3 text-[13px] space-y-1 list-decimal list-inside">
+        <li>Select a playlist in rekordbox</li>
+        <li>File &gt; Export a Playlist to a File</li>
+        <li>Drop the .txt here</li>
+      </ol>
       <button
         type="button"
         onClick={() => input.current?.click()}
