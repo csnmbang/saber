@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { DropZone } from '@/components/DropZone';
 import { dominantGenre, trackReadSet } from '@/lib/analytics';
 import { SaveImage } from '@/components/SaveImage';
@@ -13,57 +14,9 @@ import type { ParseResult } from '@/lib/parse/types';
 import { computeVitals, type Vitals } from '@/lib/metrics/vitals';
 import type { BeatportScore } from '@/lib/beatport/match';
 
-type Analysis = { parsed: ParseResult; vitals: Vitals; example?: Example };
+import { EXAMPLES, formatPlayed } from '@/lib/examples';
 
-/**
- * Sets anyone can look at without owning a rekordbox export. The drop zone
- * asks for a file before it shows anything, which is a lot to ask of someone
- * who does not yet know what this is.
- *
- * A list rather than one button, because there will be more of these. Each one
- * is a published tracklist with tempo and key looked up per track. Nobody
- * exported these from anything, and the copy under the list says so.
- * test/fixtures/rekordbox/README.md records exactly how they were built.
- */
-type Example = {
-  id: string;
-  file: string;
-  artist: string;
-  name: string;
-  playedAt: string;
-};
-
-const EXAMPLES: Example[] = [
-  {
-    id: 'purple-disco-tales-2026-08',
-    file: '/demo/purple-disco-tales-2026-08.txt',
-    artist: 'Purple Disco Machine',
-    name: 'Purple Disco Tales August',
-    playedAt: '2026-08-20',
-  },
-  {
-    id: 'global-dance-hq-2026-08-14',
-    file: '/demo/global-dance-hq-2026-08-14.txt',
-    artist: 'Pete Tong, Michael Bibi, Tini Gessler',
-    name: 'Global Dance HQ',
-    playedAt: '2026-08-14',
-  },
-  {
-    id: 'asot-ibiza-2026',
-    file: '/demo/asot-ibiza-2026.txt',
-    artist: 'Armin van Buuren',
-    name: 'A State Of Trance Ibiza 2026',
-    playedAt: '2026-08-06',
-  },
-];
-
-function formatPlayed(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+type Analysis = { parsed: ParseResult; vitals: Vitals };
 
 export function SetReader({ canSave }: { canSave: boolean }) {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -72,7 +25,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
   // or the request failed) — either way the reading just doesn't render.
   const [beatport, setBeatport] = useState<BeatportScore | null | undefined>(undefined);
 
-  async function handleFile(file: File, example?: Example) {
+  async function handleFile(file: File) {
     setError(null);
     setBeatport(undefined);
     try {
@@ -82,7 +35,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         setAnalysis(null);
         return;
       }
-      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks), example });
+      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks) });
       trackReadSet({
         source: parsed.source,
         trackCount: parsed.tracks.length,
@@ -116,12 +69,6 @@ export function SetReader({ canSave }: { canSave: boolean }) {
     }
   }
 
-  async function loadExample(example: Example) {
-    const response = await fetch(example.file);
-    const blob = await response.blob();
-    await handleFile(new File([blob], `${example.id}.txt`), example);
-  }
-
   return (
     <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-16 flex flex-col gap-12">
       <header>
@@ -146,10 +93,9 @@ export function SetReader({ canSave }: { canSave: boolean }) {
             <ul className="mt-2">
               {EXAMPLES.map((example) => (
                 <li key={example.id} className="border-t border-line last:border-b">
-                  <button
-                    type="button"
-                    onClick={() => loadExample(example)}
-                    className="group w-full py-3 text-left"
+                  <Link
+                    href={`/example/${example.id}`}
+                    className="group block w-full py-3"
                   >
                     <span className="flex flex-wrap items-baseline justify-between gap-x-6">
                       {/* Whose set it is carries the line. A three-name credit
@@ -160,7 +106,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
                       <span className="label shrink-0">{formatPlayed(example.playedAt)}</span>
                     </span>
                     <span className="block text-[13px] text-muted/70 mt-0.5">{example.name}</span>
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -173,21 +119,9 @@ export function SetReader({ canSave }: { canSave: boolean }) {
 
       {analysis && (
         <>
-          {analysis.example && (
-            <div className="-mb-6">
-              <p className="label">Example</p>
-              <p className="mt-1">{analysis.example.artist}</p>
-              <p className="text-[13px] text-muted">{analysis.example.name}</p>
-            </div>
-          )}
-
           <SetSummary
             vitals={analysis.vitals}
-            meta={
-              analysis.example
-                ? `${analysis.parsed.tracks.length} tracks · ${formatPlayed(analysis.example.playedAt)}`
-                : `${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`
-            }
+            meta={`${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`}
             beatport={beatport}
             tracks={analysis.parsed.tracks}
           />
@@ -216,15 +150,8 @@ export function SetReader({ canSave }: { canSave: boolean }) {
           />
           <div className="flex flex-wrap gap-10">
             <ShareLink vitals={analysis.vitals} />
-            {canSave && !analysis.example && (
-              <SaveSet tracks={analysis.parsed.tracks} source={analysis.parsed.source} />
-            )}
+            {canSave && <SaveSet tracks={analysis.parsed.tracks} source={analysis.parsed.source} />}
           </div>
-          {analysis.example && (
-            <p className="text-[13px] text-muted">
-              Examples aren&apos;t saved to a profile. Drop your own track list to save one.
-            </p>
-          )}
         </>
       )}
     </main>
