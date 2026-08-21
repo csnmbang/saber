@@ -13,22 +13,43 @@ import type { ParseResult } from '@/lib/parse/types';
 import { computeVitals, type Vitals } from '@/lib/metrics/vitals';
 import type { BeatportScore } from '@/lib/beatport/match';
 
-type Analysis = { parsed: ParseResult; vitals: Vitals; title?: string };
+type Analysis = { parsed: ParseResult; vitals: Vitals; example?: Example };
 
 /**
- * A published set anyone can look at without having a rekordbox export to
- * hand — the drop zone asks for a file before it will show you anything, which
- * is a lot to ask of someone who just wants to know what this is.
+ * Sets anyone can look at without owning a rekordbox export. The drop zone
+ * asks for a file before it shows anything, which is a lot to ask of someone
+ * who does not yet know what this is.
  *
- * Named in full, and honestly: this is a published tracklist with tempo and key
- * looked up per track, not an export anybody made. See the note in
- * test/fixtures/rekordbox/README.md for exactly how it was assembled.
+ * A list rather than one button, because there will be more of these. Each one
+ * is a published tracklist with tempo and key looked up per track. Nobody
+ * exported these from anything, and the copy under the list says so.
+ * test/fixtures/rekordbox/README.md records exactly how they were built.
  */
-const DEMO = {
-  file: '/demo/asot-ibiza-2026.txt',
-  title: 'Armin van Buuren — A State Of Trance Ibiza 2026',
-  playedAt: '2026-08-06',
+type Example = {
+  id: string;
+  file: string;
+  artist: string;
+  name: string;
+  playedAt: string;
 };
+
+const EXAMPLES: Example[] = [
+  {
+    id: 'asot-ibiza-2026',
+    file: '/demo/asot-ibiza-2026.txt',
+    artist: 'Armin van Buuren',
+    name: 'A State Of Trance Ibiza 2026',
+    playedAt: '2026-08-06',
+  },
+];
+
+function formatPlayed(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export function SetReader({ canSave }: { canSave: boolean }) {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -37,7 +58,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
   // or the request failed) — either way the reading just doesn't render.
   const [beatport, setBeatport] = useState<BeatportScore | null | undefined>(undefined);
 
-  async function handleFile(file: File, title?: string) {
+  async function handleFile(file: File, example?: Example) {
     setError(null);
     setBeatport(undefined);
     try {
@@ -47,7 +68,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         setAnalysis(null);
         return;
       }
-      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks), title });
+      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks), example });
       trackReadSet({
         source: parsed.source,
         trackCount: parsed.tracks.length,
@@ -81,10 +102,10 @@ export function SetReader({ canSave }: { canSave: boolean }) {
     }
   }
 
-  async function loadDemo() {
-    const response = await fetch(DEMO.file);
+  async function loadExample(example: Example) {
+    const response = await fetch(example.file);
     const blob = await response.blob();
-    await handleFile(new File([blob], 'asot-ibiza-2026.txt'), DEMO.title);
+    await handleFile(new File([blob], `${example.id}.txt`), example);
   }
 
   return (
@@ -106,32 +127,48 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         <>
           <DropZone onFile={handleFile} />
           {error && <p className="text-[13px]">{error}</p>}
-          <div>
-            <button type="button" onClick={loadDemo} className="btn-quiet">
-              See a set first
-            </button>
+          <section>
+            <p className="label">See an example</p>
+            <ul className="mt-2">
+              {EXAMPLES.map((example) => (
+                <li key={example.id} className="border-t border-line last:border-b">
+                  <button
+                    type="button"
+                    onClick={() => loadExample(example)}
+                    className="w-full flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3 text-left text-muted hover:text-text transition-colors"
+                  >
+                    <span>
+                      {example.artist}, {example.name}
+                    </span>
+                    <span className="label shrink-0">{formatPlayed(example.playedAt)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
             <p className="text-[13px] text-muted mt-3">
-              {DEMO.title}, {DEMO.playedAt}. A published tracklist with each track&rsquo;s tempo and
-              key looked up — not an export.
+              Published tracklists. Tempo and key for each track come from Beatport, so none of
+              this came out of rekordbox.
             </p>
-          </div>
+          </section>
         </>
       )}
 
       {analysis && (
         <>
-          {analysis.title && (
+          {analysis.example && (
             <div className="-mb-6">
-              <p className="label">Set</p>
-              <p className="mt-1">{analysis.title}</p>
+              <p className="label">Example</p>
+              <p className="mt-1">
+                {analysis.example.artist}, {analysis.example.name}
+              </p>
             </div>
           )}
 
           <SetSummary
             vitals={analysis.vitals}
             meta={
-              analysis.title
-                ? `${analysis.parsed.tracks.length} tracks · ${DEMO.playedAt}`
+              analysis.example
+                ? `${analysis.parsed.tracks.length} tracks · ${formatPlayed(analysis.example.playedAt)}`
                 : `${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`
             }
             beatport={beatport}
@@ -142,12 +179,12 @@ export function SetReader({ canSave }: { canSave: boolean }) {
             <section className="border border-line bg-surface p-5">
               <p className="label">No key data</p>
               <p className="mt-2 text-[13px]">
-                {Math.round(analysis.parsed.keyCoverage * 100)}% of these tracks have a key, so the
-                harmonic readings are blank rather than guessed. Tempo and structure below still
-                hold.
+                Only {Math.round(analysis.parsed.keyCoverage * 100)}% of these tracks carry a key.
+                Harmonic and Risk are left blank rather than guessed. Range, Climb and the tempo
+                curve still read normally.
               </p>
               <p className="mt-2 text-[13px] text-muted">
-                Select the tracks in rekordbox, right-click, Analyze. Then export again.
+                To fix it: select the tracks in rekordbox, right-click, Analyze, then export again.
               </p>
             </section>
           )}

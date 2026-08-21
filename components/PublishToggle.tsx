@@ -44,7 +44,7 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
       <section className="border border-line bg-surface p-5">
         <p className="label">Published</p>
         <p className="mt-2 text-[13px]">
-          Anyone with the link can open this page, tracklist included.
+          Anyone with the link can open this page, including every track below.
         </p>
         <div className="mt-4 flex flex-wrap gap-4">
           <button
@@ -72,8 +72,8 @@ export function PublishToggle({ id, isPublic }: { id: string; isPublic: boolean 
     <section className="border border-line bg-surface p-5">
       <p className="label">Only you can open this</p>
       <p className="mt-2 text-[13px]">
-        Publishing puts this at a link anyone can open: the readings, the rings, and every track
-        below. Unpublish anytime.
+        Publish and anyone with the link can open this page, including every track below.
+        Unpublish anytime.
       </p>
       <button
         type="button"
