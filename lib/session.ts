@@ -64,6 +64,11 @@ export function holdsGrant(grants: SetGrant[], setId: string, claimToken: string
   return grants.some((g) => g.setId === setId && g.claimToken === claimToken);
 }
 
+/** Drops a grant, for a set that no longer exists to hold a claim to. */
+export function removeGrant(grants: SetGrant[], setId: string): SetGrant[] {
+  return grants.filter((g) => g.setId !== setId);
+}
+
 /**
  * A random id kept in a signed cookie, identifying a browser and nothing else.
  *

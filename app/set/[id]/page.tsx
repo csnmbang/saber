@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { SaveImage } from '@/components/SaveImage';
 import { SetSummary } from '@/components/SetSummary';
+import { DeleteSet } from '@/components/DeleteSet';
 import { PublishToggle } from '@/components/PublishToggle';
 import { Tracklist } from '@/components/Tracklist';
 import { decodeGrants, holdsGrant, SESSION_COOKIE } from '@/lib/session';
@@ -95,7 +96,12 @@ export default async function SavedSet({ params }: { params: Promise<{ id: strin
 
       {tracks.length > 0 && <Tracklist tracks={tracks} />}
 
-      {isOwner && <PublishToggle id={set.id} isPublic={set.is_public} />}
+      {isOwner && (
+        <div className="flex flex-col gap-5">
+          <PublishToggle id={set.id} isPublic={set.is_public} />
+          <DeleteSet id={set.id} />
+        </div>
+      )}
 
       <div>
         <Link
