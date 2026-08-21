@@ -13,7 +13,22 @@ import type { ParseResult } from '@/lib/parse/types';
 import { computeVitals, type Vitals } from '@/lib/metrics/vitals';
 import type { BeatportScore } from '@/lib/beatport/match';
 
-type Analysis = { parsed: ParseResult; vitals: Vitals };
+type Analysis = { parsed: ParseResult; vitals: Vitals; title?: string };
+
+/**
+ * A published set anyone can look at without having a rekordbox export to
+ * hand — the drop zone asks for a file before it will show you anything, which
+ * is a lot to ask of someone who just wants to know what this is.
+ *
+ * Named in full, and honestly: this is a published tracklist with tempo and key
+ * looked up per track, not an export anybody made. See the note in
+ * test/fixtures/rekordbox/README.md for exactly how it was assembled.
+ */
+const DEMO = {
+  file: '/demo/asot-ibiza-2026.txt',
+  title: 'Armin van Buuren — A State Of Trance Ibiza 2026',
+  playedAt: '2026-08-06',
+};
 
 export function SetReader({ canSave }: { canSave: boolean }) {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -22,7 +37,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
   // or the request failed) — either way the reading just doesn't render.
   const [beatport, setBeatport] = useState<BeatportScore | null | undefined>(undefined);
 
-  async function handleFile(file: File) {
+  async function handleFile(file: File, title?: string) {
     setError(null);
     setBeatport(undefined);
     try {
@@ -32,7 +47,7 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         setAnalysis(null);
         return;
       }
-      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks) });
+      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks), title });
       trackReadSet({
         source: parsed.source,
         trackCount: parsed.tracks.length,
@@ -66,6 +81,12 @@ export function SetReader({ canSave }: { canSave: boolean }) {
     }
   }
 
+  async function loadDemo() {
+    const response = await fetch(DEMO.file);
+    const blob = await response.blob();
+    await handleFile(new File([blob], 'asot-ibiza-2026.txt'), DEMO.title);
+  }
+
   return (
     <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-16 flex flex-col gap-12">
       <header>
@@ -85,14 +106,34 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         <>
           <DropZone onFile={handleFile} />
           {error && <p className="text-[13px]">{error}</p>}
+          <div>
+            <button type="button" onClick={loadDemo} className="btn-quiet">
+              See a set first
+            </button>
+            <p className="text-[13px] text-muted mt-3">
+              {DEMO.title}, {DEMO.playedAt}. A published tracklist with each track&rsquo;s tempo and
+              key looked up — not an export.
+            </p>
+          </div>
         </>
       )}
 
       {analysis && (
         <>
+          {analysis.title && (
+            <div className="-mb-6">
+              <p className="label">Set</p>
+              <p className="mt-1">{analysis.title}</p>
+            </div>
+          )}
+
           <SetSummary
             vitals={analysis.vitals}
-            meta={`${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`}
+            meta={
+              analysis.title
+                ? `${analysis.parsed.tracks.length} tracks · ${DEMO.playedAt}`
+                : `${analysis.parsed.tracks.length} tracks · ${analysis.parsed.source}`
+            }
             beatport={beatport}
             tracks={analysis.parsed.tracks}
           />
