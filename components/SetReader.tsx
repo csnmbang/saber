@@ -12,6 +12,7 @@ import { Tracklist } from '@/components/Tracklist';
 import { parseRekordboxTxt } from '@/lib/parse/rekordbox';
 import type { ParseResult } from '@/lib/parse/types';
 import { computeVitals, type Vitals } from '@/lib/metrics/vitals';
+import { resolveArchetype } from '@/lib/metrics/archetype';
 import type { BeatportScore } from '@/lib/beatport/match';
 
 import { EXAMPLES, formatPlayed } from '@/lib/examples';
@@ -35,7 +36,8 @@ export function SetReader({ canSave }: { canSave: boolean }) {
         setAnalysis(null);
         return;
       }
-      setAnalysis({ parsed, vitals: computeVitals(parsed.tracks) });
+      const vitals = computeVitals(parsed.tracks);
+      setAnalysis({ parsed, vitals });
       trackReadSet({
         source: parsed.source,
         trackCount: parsed.tracks.length,
@@ -51,6 +53,8 @@ export function SetReader({ canSave }: { canSave: boolean }) {
           source: parsed.source,
           trackCount: parsed.tracks.length,
           hasEnoughKeys: parsed.hasEnoughKeys,
+          archetype: resolveArchetype(vitals).id,
+          vitals,
         }),
         keepalive: true,
       }).catch(() => {});
