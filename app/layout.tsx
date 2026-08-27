@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { TabBar } from '@/components/TabBar';
+import { VisitTracker } from '@/components/VisitTracker';
 import { Anton, Space_Grotesk, Space_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="min-h-full flex flex-col tab-bar-offset">
         {children}
         <TabBar />
+        <VisitTracker />
         <Analytics />
       </body>
     </html>
