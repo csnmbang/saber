@@ -8,6 +8,10 @@ for the full spec — product rules, design system, data model, and build order.
 
 Live at [saber.me](https://saber.me).
 
+![A Saber reading of Armin van Buuren's A State Of Trance Ibiza 2026 set: archetype "The Marathon", harmonic 38%, risk 62%, range 84%, climb 0.91, with each key drawn as a ring](assets/reading.png)
+
+*A reading of a published 43-track set ([see it live](https://saber.me/example/asot-ibiza-2026)). Each ring is a key, its thickness is time spent in that key, and in the app the rings turn at the set's own tempo.*
+
 ## Status
 
 The core loop is live: drop a file, read it, save it, publish it, delete it. Every build-order
